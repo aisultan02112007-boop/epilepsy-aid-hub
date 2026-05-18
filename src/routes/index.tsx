@@ -6,9 +6,9 @@ import { Dashboard } from "@/components/Dashboard";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "EpiCare — Epilepsy First Aid Education" },
+      { title: "MedCare — Epilepsy First Aid Education" },
       { name: "description", content: "Learn epilepsy first aid. Practice simulations, track symptoms, and be ready to help save a life." },
-      { property: "og:title", content: "EpiCare — Epilepsy First Aid Education" },
+      { property: "og:title", content: "MedCare — Epilepsy First Aid Education" },
       { property: "og:description", content: "Learn to help. Save a life." },
     ],
   }),

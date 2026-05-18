@@ -18,59 +18,105 @@ export function AuthScreen() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-5 py-10 bg-app-bg">
-      <div className="w-full max-w-md">
-        <div className="flex flex-col items-center text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-app-primary text-white flex items-center justify-center shadow-md mb-4">
-            <HeartPulse size={32} strokeWidth={2.5} />
+    <main
+      className="min-h-screen flex items-center justify-center px-4 py-10"
+      style={{ backgroundColor: "#F0F4FF" }}
+    >
+      <div className="app-card w-full" style={{ maxWidth: 400, padding: 40 }}>
+        <div className="flex flex-col items-center text-center mb-7">
+          <div
+            className="flex items-center justify-center mb-4"
+            style={{
+              width: 64,
+              height: 64,
+              borderRadius: 16,
+              backgroundColor: "rgba(37, 99, 235, 0.10)",
+              color: "#2563EB",
+            }}
+          >
+            <HeartPulse size={32} strokeWidth={2.4} />
           </div>
-          <h1 className="text-2xl font-extrabold text-app-text">EpiCare</h1>
-          <p className="text-app-text/70 mt-1">Learn to help. Save a life.</p>
+          <h1 className="app-logo">MedCare</h1>
+          <p className="app-muted mt-2" style={{ fontSize: 15 }}>
+            Learn to help. Save a life.
+          </p>
         </div>
 
-        <div className="app-card">
-          <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl mb-5">
-            {(["login", "register"] as const).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => { setMode(m); setError(null); }}
-                className={`min-h-10 rounded-lg text-sm font-semibold transition-colors ${
-                  mode === m ? "bg-white text-app-primary shadow-sm" : "text-app-text/60"
-                }`}
-              >
-                {m === "login" ? "Login" : "Register"}
-              </button>
-            ))}
-          </div>
-
-          <form onSubmit={submit} className="space-y-4">
-            {mode === "register" && (
-              <div>
-                <label className="app-label" htmlFor="name">Name</label>
-                <input id="name" className="app-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
-              </div>
-            )}
-            <div>
-              <label className="app-label" htmlFor="email">Email</label>
-              <input id="email" type="email" className="app-input" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" />
-            </div>
-            <div>
-              <label className="app-label" htmlFor="password">Password</label>
-              <input id="password" type="password" className="app-input" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" autoComplete={mode === "login" ? "current-password" : "new-password"} />
-            </div>
-
-            {error && (
-              <p className="text-sm text-app-error font-medium">{error}</p>
-            )}
-
-            <button type="submit" className="app-btn-primary w-full">
-              {mode === "login" ? "Log in" : "Create account"}
+        <div
+          className="flex mb-6"
+          style={{ borderBottom: "1px solid #E2E8F0" }}
+          role="tablist"
+        >
+          {(["login", "register"] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              role="tab"
+              data-active={mode === m}
+              onClick={() => {
+                setMode(m);
+                setError(null);
+              }}
+              className="app-tab"
+            >
+              {m === "login" ? "Login" : "Register"}
             </button>
-          </form>
+          ))}
         </div>
 
-        <p className="text-xs text-center text-app-text/50 mt-6 px-4">
+        <form onSubmit={submit} className="flex flex-col gap-4">
+          {mode === "register" && (
+            <div>
+              <label className="app-label" htmlFor="name">Name</label>
+              <input
+                id="name"
+                className="app-input"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your name"
+              />
+            </div>
+          )}
+          <div>
+            <label className="app-label" htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              className="app-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              autoComplete="email"
+            />
+          </div>
+          <div>
+            <label className="app-label" htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              className="app-input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              autoComplete={mode === "login" ? "current-password" : "new-password"}
+            />
+          </div>
+
+          {error && (
+            <p style={{ color: "#EF4444", fontSize: 14, fontWeight: 500 }}>
+              {error}
+            </p>
+          )}
+
+          <button type="submit" className="app-btn app-btn-primary w-full mt-2">
+            {mode === "login" ? "Log in" : "Create account"}
+          </button>
+        </form>
+
+        <p
+          className="text-center mt-6"
+          style={{ fontSize: 12, color: "#94A3B8", lineHeight: 1.5 }}
+        >
           Educational content only. In an emergency, call your local emergency number.
         </p>
       </div>
