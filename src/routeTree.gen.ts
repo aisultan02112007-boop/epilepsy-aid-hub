@@ -10,43 +10,43 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ApiSimulationRouteImport } from './routes/api/simulation'
+import { Route as ApiPublicSimulationRouteImport } from './routes/api/public/simulation'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiSimulationRoute = ApiSimulationRouteImport.update({
-  id: '/api/simulation',
-  path: '/api/simulation',
+const ApiPublicSimulationRoute = ApiPublicSimulationRouteImport.update({
+  id: '/api/public/simulation',
+  path: '/api/public/simulation',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/api/simulation': typeof ApiSimulationRoute
+  '/api/public/simulation': typeof ApiPublicSimulationRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/api/simulation': typeof ApiSimulationRoute
+  '/api/public/simulation': typeof ApiPublicSimulationRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/api/simulation': typeof ApiSimulationRoute
+  '/api/public/simulation': typeof ApiPublicSimulationRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/simulation'
+  fullPaths: '/' | '/api/public/simulation'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/simulation'
-  id: '__root__' | '/' | '/api/simulation'
+  to: '/' | '/api/public/simulation'
+  id: '__root__' | '/' | '/api/public/simulation'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ApiSimulationRoute: typeof ApiSimulationRoute
+  ApiPublicSimulationRoute: typeof ApiPublicSimulationRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,11 +58,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/simulation': {
-      id: '/api/simulation'
-      path: '/api/simulation'
-      fullPath: '/api/simulation'
-      preLoaderRoute: typeof ApiSimulationRouteImport
+    '/api/public/simulation': {
+      id: '/api/public/simulation'
+      path: '/api/public/simulation'
+      fullPath: '/api/public/simulation'
+      preLoaderRoute: typeof ApiPublicSimulationRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -70,8 +70,18 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ApiSimulationRoute: ApiSimulationRoute,
+  ApiPublicSimulationRoute: ApiPublicSimulationRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
