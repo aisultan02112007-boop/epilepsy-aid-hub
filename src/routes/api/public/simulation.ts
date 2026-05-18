@@ -4,43 +4,36 @@ import { generateText, Output } from "ai";
 import { z } from "zod";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
 
-const ScenarioSchema = z.object({
-  location: z.string(),
-  situation: z.string(),
-  steps: z
+const QuizSchema = z.object({
+  questions: z
     .array(
       z.object({
         question: z.string(),
         hint: z.string(),
+        scenario: z.string(),
         options: z
-          .array(
-            z.object({
-              text: z.string(),
-              correct: z.boolean(),
-              explanation: z.string(),
-            }),
-          )
-          .min(3)
-          .max(3),
+          .array(z.object({
+            text: z.string(),
+            correct: z.boolean(),
+            explanation: z.string(),
+          }))
+          .min(5).max(5),
       }),
     )
-    .min(3)
-    .max(3),
-  timer_seconds: z.number().int().min(30).max(300),
+    .min(10).max(10),
 });
 
-const PROMPT = `Сгенерируй уникальный сценарий первой помощи при эпилептическом приступе.
+const PROMPT = `Сгенерируй 10 уникальных вопросов по первой помощи при эпилептическом приступе.
 
 Требования:
-- Поле "location": одно из "Дома", "На улице", "В школе" (на русском).
-- Поле "situation": короткое описание ситуации (1-2 предложения) на русском.
-- Ровно 3 шага в "steps". В каждом шаге 3 варианта ответа: один правильный, два неправильных.
-- Каждый шаг включает "question", "hint" (короткая обучающая подсказка) и "options".
-- В каждом варианте: "text", "correct" (true/false), "explanation" (почему правильно/неправильно).
-- "timer_seconds": целое число секунд, отражающее ограничение по времени для последнего шага (обычно 60-180).
-- Каждый раз меняй локацию, ситуацию и формулировки. Не повторяйся.
-- Весь текст — на русском языке.
-- Сценарий должен быть медицински корректным (положить на бок, ничего в рот, засечь время приступа и т.д.).`;
+- Ровно 10 вопросов.
+- Каждый вопрос содержит "scenario" (короткий контекст — место/ситуация, напр. "Дома", "На улице", "В школе", "На работе", "В транспорте"), "question" (сам вопрос), "hint" (короткая обучающая подсказка) и "options".
+- Ровно 5 вариантов ответа. РОВНО один правильный (correct=true), четыре неправильных (correct=false).
+- Каждый вариант: "text", "correct" (boolean), "explanation" (почему правильно или неправильно).
+- Варьируй сценарии: дом, улица, школа, работа, транспорт.
+- Весь текст — на русском.
+- Медицински корректно: положить на бок, ничего в рот, засечь время, не удерживать силой, скорая если > 5 мин и т.д.
+- Не повторяй вопросы.`;
 
 export const Route = createFileRoute("/api/public/simulation")({
   server: {
@@ -48,33 +41,24 @@ export const Route = createFileRoute("/api/public/simulation")({
       POST: async () => {
         const key = process.env.LOVABLE_API_KEY;
         if (!key) {
-          return new Response(
-            JSON.stringify({ error: "LOVABLE_API_KEY is not configured" }),
-            { status: 500, headers: { "Content-Type": "application/json" } },
-          );
+          return new Response(JSON.stringify({ error: "LOVABLE_API_KEY is not configured" }), {
+            status: 500, headers: { "Content-Type": "application/json" },
+          });
         }
-
         try {
           const gateway = createLovableAiGatewayProvider(key);
           const model = gateway("google/gemini-3-flash-preview");
-
           const { experimental_output } = await generateText({
             model,
-            experimental_output: Output.object({ schema: ScenarioSchema }),
+            experimental_output: Output.object({ schema: QuizSchema }),
             prompt: PROMPT,
           });
-
           return Response.json(experimental_output);
         } catch (err) {
           const message = err instanceof Error ? err.message : "Unknown error";
-          const status = /rate limit|429/i.test(message)
-            ? 429
-            : /402|credit/i.test(message)
-              ? 402
-              : 500;
+          const status = /rate limit|429/i.test(message) ? 429 : /402|credit/i.test(message) ? 402 : 500;
           return new Response(JSON.stringify({ error: message }), {
-            status,
-            headers: { "Content-Type": "application/json" },
+            status, headers: { "Content-Type": "application/json" },
           });
         }
       },
