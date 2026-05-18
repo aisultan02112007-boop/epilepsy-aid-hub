@@ -38,42 +38,20 @@ export function AuthScreen() {
           </div>
           <h1 className="app-logo">MedCare</h1>
           <p className="app-muted mt-2" style={{ fontSize: 15 }}>
-            Learn to help. Save a life.
+            Научись помогать. Спаси жизнь.
           </p>
-        </div>
-
-        <div
-          className="flex mb-6"
-          style={{ borderBottom: "1px solid #E2E8F0" }}
-          role="tablist"
-        >
-          {(["login", "register"] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              role="tab"
-              data-active={mode === m}
-              onClick={() => {
-                setMode(m);
-                setError(null);
-              }}
-              className="app-tab"
-            >
-              {m === "login" ? "Login" : "Register"}
-            </button>
-          ))}
         </div>
 
         <form onSubmit={submit} className="flex flex-col gap-4">
           {mode === "register" && (
             <div>
-              <label className="app-label" htmlFor="name">Name</label>
+              <label className="app-label" htmlFor="name">Имя</label>
               <input
                 id="name"
                 className="app-input"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Your name"
+                placeholder="Ваше имя"
               />
             </div>
           )}
@@ -90,7 +68,7 @@ export function AuthScreen() {
             />
           </div>
           <div>
-            <label className="app-label" htmlFor="password">Password</label>
+            <label className="app-label" htmlFor="password">Пароль</label>
             <input
               id="password"
               type="password"
@@ -109,16 +87,33 @@ export function AuthScreen() {
           )}
 
           <button type="submit" className="app-btn app-btn-primary w-full mt-2">
-            {mode === "login" ? "Log in" : "Create account"}
+            {mode === "login" ? "Войти" : "Создать аккаунт"}
           </button>
-        </form>
 
-        <p
-          className="text-center mt-6"
-          style={{ fontSize: 12, color: "#94A3B8", lineHeight: 1.5 }}
-        >
-          Educational content only. In an emergency, call your local emergency number.
-        </p>
+          <p
+            className="text-center mt-2"
+            style={{ fontSize: 14, color: "#64748B" }}
+          >
+            {mode === "login" ? "Нет аккаунта? " : "Уже есть аккаунт? "}
+            <button
+              type="button"
+              onClick={() => {
+                setMode(mode === "login" ? "register" : "login");
+                setError(null);
+              }}
+              style={{
+                color: "#2563EB",
+                fontWeight: 600,
+                background: "none",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+              }}
+            >
+              {mode === "login" ? "Создать аккаунт" : "Войти"}
+            </button>
+          </p>
+        </form>
       </div>
     </main>
   );
