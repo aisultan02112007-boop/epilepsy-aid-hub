@@ -1,448 +1,307 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ArrowLeft,
-  CheckCircle2,
-  XCircle,
-  RefreshCw,
-  MapPin,
-  Timer,
-  Lightbulb,
-  Trophy,
-  Loader2,
+  CheckCircle2, XCircle, RefreshCw, Lightbulb, Trophy, Loader2, MapPin, Medal,
 } from "lucide-react";
+import { useAuth } from "@/lib/auth";
+import { getWeeklyLeaderboard } from "@/lib/leaderboard";
 
 type Option = { text: string; correct: boolean; explanation: string };
-type Step = { question: string; hint: string; options: Option[] };
-type Scenario = {
-  location: string;
-  situation: string;
-  steps: Step[];
-  timer_seconds: number;
-};
+type Question = { question: string; hint: string; scenario: string; options: Option[] };
+type Quiz = { questions: Question[] };
 
 type ScoreEntry = { date: string; score: number; total: number };
-type Mode = "learn" | "test";
-
 const HISTORY_KEY = "epi_sim_history";
 
 function readHistory(): ScoreEntry[] {
-  try {
-    const raw = localStorage.getItem(HISTORY_KEY);
-    return raw ? (JSON.parse(raw) as ScoreEntry[]) : [];
-  } catch {
-    return [];
-  }
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]"); } catch { return []; }
 }
-
-function pushHistory(entry: ScoreEntry) {
-  const next = [entry, ...readHistory()].slice(0, 5);
+function pushHistory(e: ScoreEntry) {
+  const next = [e, ...readHistory()].slice(0, 20);
   localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
   return next;
 }
 
-export function Simulation({ onBack }: { onBack: () => void }) {
-  const [mode, setMode] = useState<Mode>("learn");
-  const [scenario, setScenario] = useState<Scenario | null>(null);
+const MAX_POINTS = 1000;
+const PASS = 700;
+
+export function Simulation() {
+  const { user } = useAuth();
+  const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [stepIndex, setStepIndex] = useState(0);
+  const [idx, setIdx] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
+  const [hintShown, setHintShown] = useState(false);
   const [score, setScore] = useState(0);
   const [finished, setFinished] = useState(false);
-  const [history, setHistory] = useState<ScoreEntry[]>([]);
+  const startedAt = useRef<number>(Date.now());
 
-  // timer for final step
-  const [timeLeft, setTimeLeft] = useState<number | null>(null);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const fetchScenario = async () => {
-    setLoading(true);
-    setError(null);
-    setScenario(null);
-    setStepIndex(0);
-    setSelected(null);
-    setScore(0);
-    setFinished(false);
-    setTimeLeft(null);
+  const fetchQuiz = async () => {
+    setLoading(true); setError(null); setQuiz(null);
+    setIdx(0); setSelected(null); setHintShown(false); setScore(0); setFinished(false);
+    startedAt.current = Date.now();
     try {
       const res = await fetch("/api/public/simulation", { method: "POST" });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body?.error || `Request failed (${res.status})`);
       }
-      const data = (await res.json()) as Scenario;
-      setScenario(data);
+      setQuiz((await res.json()) as Quiz);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Не удалось загрузить сценарий.");
-    } finally {
-      setLoading(false);
-    }
+      setError(e instanceof Error ? e.message : "Не удалось загрузить вопросы.");
+    } finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    setHistory(readHistory());
-    fetchScenario();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useEffect(() => { fetchQuiz(); }, []);
 
-  // Start countdown when reaching the last step
-  useEffect(() => {
-    if (!scenario) return;
-    const isLast = stepIndex === scenario.steps.length - 1;
-    if (isLast && selected === null && !finished) {
-      setTimeLeft(scenario.timer_seconds);
-      timerRef.current && clearInterval(timerRef.current);
-      timerRef.current = setInterval(() => {
-        setTimeLeft((t) => {
-          if (t === null) return t;
-          if (t <= 1) {
-            timerRef.current && clearInterval(timerRef.current);
-            return 0;
-          }
-          return t - 1;
-        });
-      }, 1000);
-    }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [scenario, stepIndex, selected, finished]);
-
-  const step = scenario?.steps[stepIndex];
-  const isLast = scenario ? stepIndex === scenario.steps.length - 1 : false;
+  const q = quiz?.questions[idx];
+  const total = quiz?.questions.length || 10;
+  const isLast = idx === total - 1;
+  const progress = Math.round(((idx + (selected !== null ? 1 : 0)) / total) * 100);
 
   const pick = (i: number) => {
-    if (selected !== null || !step) return;
+    if (selected !== null || !q) return;
     setSelected(i);
-    if (step.options[i].correct) setScore((s) => s + 1);
-    if (timerRef.current) clearInterval(timerRef.current);
+    if (q.options[i].correct) {
+      setScore((s) => s + (hintShown ? 50 : 100));
+    }
   };
 
   const next = () => {
-    if (!scenario) return;
+    if (!q) return;
     if (isLast) {
-      const entry: ScoreEntry = {
-        date: new Date().toISOString(),
-        score: score,
-        total: scenario.steps.length,
-      };
-      setHistory(pushHistory(entry));
+      pushHistory({ date: new Date().toISOString(), score, total: MAX_POINTS });
       setFinished(true);
       return;
     }
-    setStepIndex((i) => i + 1);
+    setIdx((i) => i + 1);
     setSelected(null);
+    setHintShown(false);
   };
 
-  const progressPct = useMemo(() => {
-    if (!scenario) return 0;
-    return Math.round(((stepIndex + (selected !== null ? 1 : 0)) / scenario.steps.length) * 100);
-  }, [scenario, stepIndex, selected]);
+  const leaderboard = useMemo(
+    () => getWeeklyLeaderboard(user?.name || "Вы", finished ? score : 0),
+    [finished, score, user?.name],
+  );
+
+  if (loading) {
+    return (
+      <div className="mx-auto" style={{ maxWidth: 700, padding: "120px 24px 80px" }}>
+        <div className="glass-strong flex flex-col items-center justify-center" style={{ padding: 60 }}>
+          <Loader2 size={42} color="#60A5FA" className="spin-slow" />
+          <p className="text-soft mt-4">Генерация вопросов...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mx-auto" style={{ maxWidth: 700, padding: "120px 24px 80px" }}>
+        <div className="glass-strong" style={{ padding: 32 }}>
+          <p style={{ color: "#FCA5A5", fontWeight: 700 }}>Ошибка</p>
+          <p className="text-soft mt-2" style={{ fontSize: 14 }}>{error}</p>
+          <button onClick={fetchQuiz} className="btn-primary mt-5"><RefreshCw size={18} /> Повторить</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (finished) {
+    const passed = score >= PASS;
+    return (
+      <div className="mx-auto" style={{ maxWidth: 880, padding: "120px 24px 80px" }}>
+        <div className="glass-strong animate-fade-up text-center" style={{ padding: 40 }}>
+          <div
+            className="pulse-glow mx-auto mb-5 flex items-center justify-center"
+            style={{
+              width: 96, height: 96, borderRadius: 28,
+              background: passed
+                ? "linear-gradient(135deg, #16A34A, #22D3EE)"
+                : "linear-gradient(135deg, #EF4444, #F59E0B)",
+            }}
+          >
+            <Trophy size={44} color="#fff" />
+          </div>
+          <h2 style={{ fontSize: 32, fontWeight: 800, letterSpacing: "-0.02em" }}>
+            {passed ? "Passed ✅" : "Try again ❌"}
+          </h2>
+          <p className="text-soft mt-2" style={{ fontSize: 16 }}>
+            Заработано:{" "}
+            <strong style={{ color: "#fff", fontSize: 22 }}>{score}</strong>
+            <span className="text-soft"> / {MAX_POINTS}</span>
+          </p>
+          <p className="text-soft mt-1" style={{ fontSize: 13 }}>
+            Минимум для прохождения: {PASS}
+          </p>
+          <button onClick={fetchQuiz} className="btn-primary mt-6"><RefreshCw size={18} /> Новая сессия</button>
+        </div>
+
+        <div className="glass mt-6" style={{ padding: 28 }}>
+          <div className="flex items-center gap-2 mb-2">
+            <Medal size={20} color="#FBBF24" />
+            <h3 style={{ fontSize: 20, fontWeight: 800 }}>Глобальный рейтинг</h3>
+          </div>
+          <p className="text-soft" style={{ fontSize: 12 }}>Рейтинг обновляется каждую неделю</p>
+          <div className="flex flex-col gap-2 mt-4">
+            {leaderboard.map((p, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between"
+                style={{
+                  padding: "12px 16px",
+                  borderRadius: 14,
+                  background: p.me ? "linear-gradient(135deg, rgba(37,99,235,0.35), rgba(124,58,237,0.35))" : "rgba(255,255,255,0.05)",
+                  border: "1px solid " + (p.me ? "rgba(96,165,250,0.5)" : "rgba(255,255,255,0.08)"),
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <span style={{
+                    width: 28, textAlign: "center", fontWeight: 800,
+                    color: i === 0 ? "#FBBF24" : i === 1 ? "#E5E7EB" : i === 2 ? "#FB923C" : "rgba(255,255,255,0.6)",
+                  }}>
+                    {i + 1}
+                  </span>
+                  <span style={{ fontSize: 18 }}>{p.flag}</span>
+                  <span style={{ fontWeight: p.me ? 700 : 500 }}>{p.name}{p.me && " (вы)"}</span>
+                </div>
+                <span style={{ fontWeight: 700, color: "#93C5FD" }}>{p.score}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!q) return null;
 
   return (
-    <main
-      className="min-h-screen px-5 py-6 mx-auto"
-      style={{ maxWidth: 480, backgroundColor: "#F0F4FF" }}
-    >
-      <button
-        onClick={onBack}
-        className="inline-flex items-center gap-2 mb-5"
-        style={{ color: "#2563EB", fontWeight: 600, fontSize: 15 }}
-      >
-        <ArrowLeft size={18} /> Назад
-      </button>
-
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="app-heading">Симуляция первой помощи</h1>
-      </div>
-
-      {/* Mode toggle */}
-      <div
-        className="flex p-1 mb-5"
-        style={{ backgroundColor: "#E2E8F0", borderRadius: 12 }}
-        role="tablist"
-      >
-        {(
-          [
-            { id: "learn", label: "Обучение" },
-            { id: "test", label: "Проверка" },
-          ] as { id: Mode; label: string }[]
-        ).map((m) => (
-          <button
-            key={m.id}
-            onClick={() => setMode(m.id)}
-            data-active={mode === m.id}
-            style={{
-              flex: 1,
-              minHeight: 40,
-              borderRadius: 10,
-              fontSize: 14,
-              fontWeight: 600,
-              border: "none",
-              cursor: "pointer",
-              transition: "background-color 150ms ease, color 150ms ease",
-              backgroundColor: mode === m.id ? "#ffffff" : "transparent",
-              color: mode === m.id ? "#2563EB" : "#64748B",
-              boxShadow: mode === m.id ? "0 2px 6px rgba(0,0,0,0.06)" : "none",
-            }}
-          >
-            {m.label}
-          </button>
-        ))}
-      </div>
-
-      {loading && (
-        <div className="app-card flex flex-col items-center justify-center" style={{ padding: 48 }}>
-          <Loader2 size={36} color="#2563EB" className="animate-spin" />
-          <p className="app-muted mt-4">Генерация сценария...</p>
+    <div className="mx-auto" style={{ maxWidth: 760, padding: "100px 24px 80px" }}>
+      {/* Progress */}
+      <div className="glass animate-fade-up mb-5" style={{ padding: 18 }}>
+        <div className="flex items-center justify-between mb-2.5">
+          <span style={{ fontSize: 14, fontWeight: 600 }}>
+            Вопрос {idx + 1} из {total}
+          </span>
+          <span className="text-soft" style={{ fontSize: 13 }}>
+            Очки: <strong style={{ color: "#93C5FD" }}>{score}</strong> / {MAX_POINTS}
+          </span>
         </div>
-      )}
-
-      {error && !loading && (
-        <div className="app-card" style={{ padding: 24 }}>
-          <p style={{ color: "#EF4444", fontWeight: 600 }}>Ошибка</p>
-          <p className="app-muted mt-2" style={{ fontSize: 14 }}>{error}</p>
-          <button onClick={fetchScenario} className="app-btn app-btn-primary w-full mt-5">
-            <RefreshCw size={18} style={{ marginRight: 8 }} /> Повторить
-          </button>
-        </div>
-      )}
-
-      {scenario && !loading && !finished && step && (
-        <>
-          {/* Scenario card */}
-          <div className="app-card mb-4" style={{ padding: 20 }}>
-            <div className="flex items-center justify-between mb-3">
-              <span
-                className="inline-flex items-center gap-1.5"
-                style={{
-                  backgroundColor: "rgba(37,99,235,0.10)",
-                  color: "#2563EB",
-                  fontSize: 12,
-                  fontWeight: 600,
-                  padding: "6px 10px",
-                  borderRadius: 999,
-                }}
-              >
-                <MapPin size={13} /> {scenario.location}
-              </span>
-              <span className="app-muted" style={{ fontSize: 12 }}>
-                Шаг {stepIndex + 1} / {scenario.steps.length}
-              </span>
-            </div>
-            <p style={{ fontSize: 15, color: "#1E293B", lineHeight: 1.5 }}>{scenario.situation}</p>
-
-            {/* progress bar */}
-            <div
-              style={{ marginTop: 14, height: 6, borderRadius: 999, backgroundColor: "#E2E8F0", overflow: "hidden" }}
-            >
-              <div
-                style={{
-                  height: "100%",
-                  width: `${progressPct}%`,
-                  backgroundColor: "#2563EB",
-                  transition: "width 300ms ease",
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Timer on last step */}
-          {isLast && timeLeft !== null && (
-            <div
-              className="app-card mb-4 flex items-center justify-between"
-              style={{
-                padding: "14px 18px",
-                borderLeft: `4px solid ${timeLeft <= 10 ? "#EF4444" : "#2563EB"}`,
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <Timer size={18} color={timeLeft <= 10 ? "#EF4444" : "#2563EB"} />
-                <span style={{ fontWeight: 600, color: "#1E293B" }}>Осталось времени</span>
-              </div>
-              <span
-                style={{
-                  fontVariantNumeric: "tabular-nums",
-                  fontWeight: 700,
-                  fontSize: 20,
-                  color: timeLeft <= 10 ? "#EF4444" : "#1E293B",
-                  transition: "color 200ms ease",
-                }}
-              >
-                {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, "0")}
-              </span>
-            </div>
-          )}
-
-          {/* Question card */}
-          <div className="app-card" style={{ padding: 20 }}>
-            <h2 style={{ fontSize: 17, fontWeight: 700, color: "#1E293B", lineHeight: 1.35 }}>
-              {step.question}
-            </h2>
-
-            {mode === "learn" && selected === null && (
-              <div
-                className="flex items-start gap-2 mt-3"
-                style={{
-                  padding: "10px 12px",
-                  backgroundColor: "rgba(37,99,235,0.06)",
-                  borderRadius: 10,
-                  color: "#2563EB",
-                  fontSize: 13,
-                  lineHeight: 1.4,
-                }}
-              >
-                <Lightbulb size={16} style={{ flexShrink: 0, marginTop: 1 }} />
-                <span>{step.hint}</span>
-              </div>
-            )}
-
-            <div className="flex flex-col gap-2.5 mt-4">
-              {step.options.map((opt, i) => {
-                const isSel = selected === i;
-                const reveal = selected !== null;
-                let bg = "#ffffff";
-                let border = "#E2E8F0";
-                let color = "#1E293B";
-                if (reveal) {
-                  if (opt.correct) {
-                    bg = "rgba(22,163,74,0.08)";
-                    border = "#16A34A";
-                    color = "#166534";
-                  } else if (isSel) {
-                    bg = "rgba(239,68,68,0.08)";
-                    border = "#EF4444";
-                    color = "#991B1B";
-                  } else {
-                    color = "#64748B";
-                  }
-                }
-                return (
-                  <button
-                    key={i}
-                    onClick={() => pick(i)}
-                    disabled={reveal}
-                    style={{
-                      textAlign: "left",
-                      padding: "14px 16px",
-                      borderRadius: 12,
-                      border: `1.5px solid ${border}`,
-                      backgroundColor: bg,
-                      color,
-                      fontSize: 15,
-                      fontWeight: 500,
-                      cursor: reveal ? "default" : "pointer",
-                      transition: "all 150ms ease",
-                      display: "flex",
-                      alignItems: "flex-start",
-                      gap: 10,
-                    }}
-                  >
-                    {reveal && opt.correct && (
-                      <CheckCircle2 size={18} color="#16A34A" style={{ flexShrink: 0, marginTop: 1 }} />
-                    )}
-                    {reveal && isSel && !opt.correct && (
-                      <XCircle size={18} color="#EF4444" style={{ flexShrink: 0, marginTop: 1 }} />
-                    )}
-                    <span style={{ flex: 1 }}>{opt.text}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {selected !== null && (
-              <div
-                className="mt-4"
-                style={{
-                  padding: "12px 14px",
-                  borderRadius: 10,
-                  backgroundColor: step.options[selected].correct
-                    ? "rgba(22,163,74,0.08)"
-                    : "rgba(239,68,68,0.08)",
-                  color: step.options[selected].correct ? "#166534" : "#991B1B",
-                  fontSize: 14,
-                  lineHeight: 1.45,
-                }}
-              >
-                <strong style={{ display: "block", marginBottom: 4 }}>
-                  {step.options[selected].correct ? "Правильно" : "Неправильно"}
-                </strong>
-                {step.options[selected].explanation}
-              </div>
-            )}
-
-            {selected !== null && (
-              <button onClick={next} className="app-btn app-btn-primary w-full mt-5">
-                {isLast ? "Завершить" : "Следующий шаг"}
-              </button>
-            )}
-          </div>
-        </>
-      )}
-
-      {finished && scenario && (
-        <div className="app-card" style={{ padding: 28, textAlign: "center" }}>
+        <div style={{ height: 8, borderRadius: 999, background: "rgba(255,255,255,0.1)", overflow: "hidden" }}>
           <div
-            className="flex items-center justify-center mx-auto mb-4"
             style={{
-              width: 64,
-              height: 64,
-              borderRadius: 16,
-              backgroundColor: "rgba(22,163,74,0.10)",
-              color: "#16A34A",
+              height: "100%", width: `${progress}%`,
+              background: "linear-gradient(90deg, #2563EB, #7C3AED)",
+              transition: "width 0.4s ease",
+              boxShadow: "0 0 12px rgba(37,99,235,0.6)",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Question */}
+      <div className="glass-strong animate-fade-up" style={{ padding: 28 }} key={idx}>
+        <span
+          className="inline-flex items-center gap-1.5"
+          style={{
+            background: "rgba(37,99,235,0.25)",
+            color: "#93C5FD",
+            fontSize: 12, fontWeight: 700,
+            padding: "6px 12px", borderRadius: 999,
+            border: "1px solid rgba(96,165,250,0.3)",
+          }}
+        >
+          <MapPin size={13} /> {q.scenario}
+        </span>
+        <h2 style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.3, marginTop: 14 }}>
+          {q.question}
+        </h2>
+
+        {selected === null && (
+          <button
+            onClick={() => setHintShown(true)}
+            disabled={hintShown}
+            style={{
+              marginTop: 14,
+              display: "inline-flex", alignItems: "center", gap: 8,
+              padding: "10px 14px", borderRadius: 12,
+              background: hintShown ? "rgba(251,191,36,0.15)" : "rgba(255,255,255,0.08)",
+              color: hintShown ? "#FCD34D" : "rgba(255,255,255,0.8)",
+              border: "1px solid " + (hintShown ? "rgba(251,191,36,0.3)" : "rgba(255,255,255,0.18)"),
+              fontSize: 13, fontWeight: 600, cursor: hintShown ? "default" : "pointer",
             }}
           >
-            <Trophy size={32} />
-          </div>
-          <h2 className="app-heading">Сценарий завершён</h2>
-          <p className="app-muted mt-2">
-            Ваш результат:{" "}
-            <strong style={{ color: "#1E293B" }}>
-              {score} из {scenario.steps.length}
-            </strong>
-          </p>
-
-          <button onClick={fetchScenario} className="app-btn app-btn-primary w-full mt-6">
-            <RefreshCw size={18} style={{ marginRight: 8 }} /> Новый сценарий
+            <Lightbulb size={14} /> {hintShown ? q.hint : "Показать подсказку (−50 очков)"}
           </button>
+        )}
 
-          {history.length > 0 && (
-            <div className="mt-6" style={{ textAlign: "left" }}>
-              <h3 style={{ fontSize: 14, fontWeight: 700, color: "#1E293B", marginBottom: 10 }}>
-                История (последние {history.length})
-              </h3>
-              <ul className="flex flex-col gap-2">
-                {history.map((h, i) => (
-                  <li
-                    key={i}
-                    className="flex items-center justify-between"
-                    style={{
-                      padding: "10px 14px",
-                      backgroundColor: "#F8FAFC",
-                      borderRadius: 10,
-                      fontSize: 13,
-                    }}
-                  >
-                    <span className="app-muted">
-                      {new Date(h.date).toLocaleString("ru-RU", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
-                    <span style={{ fontWeight: 600, color: "#1E293B" }}>
-                      {h.score} / {h.total}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+        <div className="flex flex-col gap-2.5 mt-5">
+          {q.options.map((opt, i) => {
+            const isSel = selected === i;
+            const reveal = selected !== null;
+            let bg = "rgba(255,255,255,0.06)";
+            let border = "rgba(255,255,255,0.15)";
+            let color = "#fff";
+            if (reveal) {
+              if (opt.correct) { bg = "rgba(22,163,74,0.20)"; border = "rgba(34,197,94,0.6)"; }
+              else if (isSel) { bg = "rgba(239,68,68,0.20)"; border = "rgba(239,68,68,0.6)"; }
+              else { color = "rgba(255,255,255,0.5)"; }
+            }
+            return (
+              <button
+                key={i}
+                onClick={() => pick(i)}
+                disabled={reveal}
+                style={{
+                  textAlign: "left",
+                  padding: "14px 16px",
+                  borderRadius: 14,
+                  border: `1.5px solid ${border}`,
+                  background: bg,
+                  color, fontSize: 15, fontWeight: 500,
+                  cursor: reveal ? "default" : "pointer",
+                  transition: "all 0.2s ease",
+                  display: "flex", alignItems: "flex-start", gap: 10,
+                  backdropFilter: "blur(8px)",
+                }}
+              >
+                {reveal && opt.correct && <CheckCircle2 size={18} color="#22C55E" style={{ flexShrink: 0, marginTop: 2 }} />}
+                {reveal && isSel && !opt.correct && <XCircle size={18} color="#EF4444" style={{ flexShrink: 0, marginTop: 2 }} />}
+                <span style={{ flex: 1 }}>{opt.text}</span>
+              </button>
+            );
+          })}
         </div>
-      )}
-    </main>
+
+        {selected !== null && (
+          <div
+            className="mt-5"
+            style={{
+              padding: "14px 16px",
+              borderRadius: 14,
+              background: q.options[selected].correct ? "rgba(22,163,74,0.15)" : "rgba(239,68,68,0.15)",
+              border: "1px solid " + (q.options[selected].correct ? "rgba(34,197,94,0.4)" : "rgba(239,68,68,0.4)"),
+              color: q.options[selected].correct ? "#86EFAC" : "#FCA5A5",
+              fontSize: 14, lineHeight: 1.5,
+            }}
+          >
+            <strong style={{ display: "block", marginBottom: 4 }}>
+              {q.options[selected].correct
+                ? `Правильно! +${hintShown ? 50 : 100} очков`
+                : "Неправильно. 0 очков"}
+            </strong>
+            {q.options[selected].explanation}
+          </div>
+        )}
+
+        {selected !== null && (
+          <button onClick={next} className="btn-primary w-full mt-5">
+            {isLast ? "Завершить" : "Следующий вопрос"}
+          </button>
+        )}
+      </div>
+    </div>
   );
 }
