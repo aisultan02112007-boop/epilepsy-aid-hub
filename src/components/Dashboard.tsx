@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { LifeBuoy, LineChart, BookOpen, User, LogOut, ArrowLeft, HeartPulse, LucideIcon } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { Simulation } from "@/components/Simulation";
 
 type CardKey = "simulation" | "diary" | "about" | "profile";
 type CardDef = { key: CardKey; title: string; desc: string; icon: LucideIcon };
@@ -17,6 +18,9 @@ export function Dashboard() {
   const [active, setActive] = useState<CardDef | null>(null);
 
   if (active) {
+    if (active.key === "simulation") {
+      return <Simulation onBack={() => setActive(null)} />;
+    }
     const Icon = active.icon;
     return (
       <main className="min-h-screen px-5 py-6 mx-auto" style={{ maxWidth: 480, backgroundColor: "#F0F4FF" }}>
