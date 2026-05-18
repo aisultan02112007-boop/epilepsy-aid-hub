@@ -1,15 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { AuthScreen } from "@/components/AuthScreen";
-import { Dashboard } from "@/components/Dashboard";
+import { AppShell } from "@/components/AppShell";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "MedCare — Epilepsy First Aid Education" },
-      { name: "description", content: "Learn epilepsy first aid. Practice simulations, track symptoms, and be ready to help save a life." },
-      { property: "og:title", content: "MedCare — Epilepsy First Aid Education" },
-      { property: "og:description", content: "Learn to help. Save a life." },
+      { title: "MedCare — Первая помощь при эпилепсии" },
+      { name: "description", content: "Интерактивное обучение первой помощи при эпилепсии. Симуляции, дневник, рейтинг." },
+      { property: "og:title", content: "MedCare — Знай. Помогай. Спасай." },
+      { property: "og:description", content: "Интерактивное обучение первой помощи при эпилепсии." },
     ],
   }),
   component: Index,
@@ -17,7 +17,7 @@ export const Route = createFileRoute("/")({
 
 function Gate() {
   const { user } = useAuth();
-  return user ? <Dashboard /> : <AuthScreen />;
+  return user ? <AppShell /> : <AuthScreen />;
 }
 
 function Index() {
