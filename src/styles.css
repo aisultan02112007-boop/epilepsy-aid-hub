@@ -145,7 +145,30 @@
   }
 
   body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
+    background-color: var(--color-app-bg);
+    color: var(--color-app-text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer components {
+  .app-card {
+    @apply bg-white rounded-2xl shadow-md p-5;
+  }
+  .app-btn {
+    @apply inline-flex items-center justify-center rounded-xl font-bold text-base min-h-12 px-5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .app-btn-primary {
+    @apply app-btn bg-app-primary text-white hover:bg-app-primary/90;
+  }
+  .app-btn-ghost {
+    @apply app-btn bg-white text-app-text border border-slate-200 hover:bg-slate-50;
+  }
+  .app-input {
+    @apply w-full min-h-12 rounded-xl border border-slate-200 bg-white px-4 text-base text-app-text placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-app-primary focus:border-transparent;
+  }
+  .app-label {
+    @apply text-sm font-medium text-app-text mb-1.5 block;
   }
 }
