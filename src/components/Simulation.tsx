@@ -66,7 +66,7 @@ export function Simulation({ onBack }: { onBack: () => void }) {
     setFinished(false);
     setTimeLeft(null);
     try {
-      const res = await fetch("/api/simulation", { method: "POST" });
+      const res = await fetch("/api/public/simulation", { method: "POST" });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body?.error || `Request failed (${res.status})`);
