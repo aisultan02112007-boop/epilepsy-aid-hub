@@ -1,26 +1,29 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AuthProvider, useAuth } from "@/lib/auth";
+import { AuthScreen } from "@/components/AuthScreen";
+import { Dashboard } from "@/components/Dashboard";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "EpiCare — Epilepsy First Aid Education" },
+      { name: "description", content: "Learn epilepsy first aid. Practice simulations, track symptoms, and be ready to help save a life." },
+      { property: "og:title", content: "EpiCare — Epilepsy First Aid Education" },
+      { property: "og:description", content: "Learn to help. Save a life." },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
+function Gate() {
+  const { user } = useAuth();
+  return user ? <Dashboard /> : <AuthScreen />;
 }
 
 function Index() {
-  return <PlaceholderIndex />;
+  return (
+    <AuthProvider>
+      <Gate />
+    </AuthProvider>
+  );
 }
