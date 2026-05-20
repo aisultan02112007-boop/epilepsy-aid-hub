@@ -34,7 +34,7 @@ export function Home({ onNavigate }: { onNavigate: (v: ViewKey) => void }) {
             fontWeight: 900,
             letterSpacing: "-0.03em",
             lineHeight: 1.05,
-            background: "linear-gradient(135deg, #fff 0%, #93C5FD 100%)",
+            background: "linear-gradient(135deg, #1E293B 0%, #2563EB 60%, #7C3AED 100%)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             maxWidth: 900,
@@ -93,7 +93,7 @@ export function Home({ onNavigate }: { onNavigate: (v: ViewKey) => void }) {
           <p className="text-soft mt-4" style={{ fontSize: 15, lineHeight: 1.6 }}>
             Эпилепсия — неврологическое расстройство, при котором в мозге возникают внезапные электрические разряды.
             Это вызывает приступы — судороги, потерю сознания или необычные ощущения.
-            Это <strong style={{ color: "#fff" }}>не психическое заболевание</strong>.
+            Это <strong style={{ color: "#1E293B" }}>не психическое заболевание</strong>.
             При правильной помощи человек быстро восстанавливается.
           </p>
         </div>
@@ -137,7 +137,7 @@ export function Home({ onNavigate }: { onNavigate: (v: ViewKey) => void }) {
                   >
                     <Icon size={26} color="#fff" />
                   </div>
-                  <ArrowRight size={20} color="rgba(255,255,255,0.5)" />
+                  <ArrowRight size={20} color="#94A3B8" />
                 </div>
                 <h3 style={{ fontSize: 20, fontWeight: 700, marginTop: 18 }}>{f.title}</h3>
                 <p className="text-soft mt-1.5" style={{ fontSize: 14, lineHeight: 1.5 }}>
