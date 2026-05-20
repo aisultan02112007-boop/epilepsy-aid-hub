@@ -17,10 +17,10 @@ const QuizSchema = z.object({
             correct: z.boolean(),
             explanation: z.string(),
           }))
-          .min(5).max(5),
+          .min(4).max(6),
       }),
     )
-    .min(10).max(10),
+    .min(8).max(12),
 });
 
 const PROMPT = `Сгенерируй 10 уникальных вопросов по первой помощи при эпилептическом приступе.
@@ -47,13 +47,16 @@ export const Route = createFileRoute("/api/public/simulation")({
         }
         try {
           const gateway = createLovableAiGatewayProvider(key);
-          const model = gateway("google/gemini-3-flash-preview");
+          const model = gateway("google/gemini-2.5-flash");
           const { experimental_output } = await generateText({
             model,
             experimental_output: Output.object({ schema: QuizSchema }),
             prompt: PROMPT,
           });
-          return Response.json(experimental_output);
+          // Trim/pad to 10 questions for stable UI
+          const out = experimental_output as { questions: unknown[] };
+          out.questions = out.questions.slice(0, 10);
+          return Response.json(out);
         } catch (err) {
           const message = err instanceof Error ? err.message : "Unknown error";
           const status = /rate limit|429/i.test(message) ? 429 : /402|credit/i.test(message) ? 402 : 500;
