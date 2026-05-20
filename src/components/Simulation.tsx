@@ -243,11 +243,14 @@ export function Simulation() {
             const reveal = selected !== null;
             let bg = "rgba(255,255,255,0.06)";
             let border = "rgba(255,255,255,0.15)";
-            let color = "#fff";
+            let color = "#1E293B";
             if (reveal) {
-              if (opt.correct) { bg = "rgba(22,163,74,0.20)"; border = "rgba(34,197,94,0.6)"; }
-              else if (isSel) { bg = "rgba(239,68,68,0.20)"; border = "rgba(239,68,68,0.6)"; }
-              else { color = "rgba(255,255,255,0.5)"; }
+              if (opt.correct) { bg = "rgba(22,163,74,0.18)"; border = "rgba(34,197,94,0.7)"; color = "#15803D"; }
+              else if (isSel) { bg = "rgba(239,68,68,0.15)"; border = "rgba(239,68,68,0.7)"; color = "#B91C1C"; }
+              else { color = "#94A3B8"; }
+            } else {
+              bg = "rgba(255,255,255,0.85)";
+              border = "rgba(148,163,184,0.35)";
             }
             return (
               <button
