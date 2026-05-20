@@ -40,7 +40,7 @@ export function Home({ onNavigate }: { onNavigate: (v: ViewKey) => void }) {
             maxWidth: 900,
           }}
         >
-          EpiCare — Знай. Помогай. Спасай.
+          MedCare — Знай. Помогай. Спасай.
         </h1>
         <p className="text-soft mt-5" style={{ fontSize: 18, maxWidth: 620, lineHeight: 1.5 }}>
           Интерактивное обучение первой помощи при эпилепсии
