@@ -243,11 +243,14 @@ export function Simulation() {
             const reveal = selected !== null;
             let bg = "rgba(255,255,255,0.06)";
             let border = "rgba(255,255,255,0.15)";
-            let color = "#fff";
+            let color = "#1E293B";
             if (reveal) {
-              if (opt.correct) { bg = "rgba(22,163,74,0.20)"; border = "rgba(34,197,94,0.6)"; }
-              else if (isSel) { bg = "rgba(239,68,68,0.20)"; border = "rgba(239,68,68,0.6)"; }
-              else { color = "rgba(255,255,255,0.5)"; }
+              if (opt.correct) { bg = "rgba(22,163,74,0.18)"; border = "rgba(34,197,94,0.7)"; color = "#15803D"; }
+              else if (isSel) { bg = "rgba(239,68,68,0.15)"; border = "rgba(239,68,68,0.7)"; color = "#B91C1C"; }
+              else { color = "#94A3B8"; }
+            } else {
+              bg = "rgba(255,255,255,0.85)";
+              border = "rgba(148,163,184,0.35)";
             }
             return (
               <button
@@ -281,9 +284,9 @@ export function Simulation() {
             style={{
               padding: "14px 16px",
               borderRadius: 14,
-              background: q.options[selected].correct ? "rgba(22,163,74,0.15)" : "rgba(239,68,68,0.15)",
-              border: "1px solid " + (q.options[selected].correct ? "rgba(34,197,94,0.4)" : "rgba(239,68,68,0.4)"),
-              color: q.options[selected].correct ? "#86EFAC" : "#FCA5A5",
+              background: q.options[selected].correct ? "rgba(22,163,74,0.10)" : "rgba(239,68,68,0.10)",
+              border: "1px solid " + (q.options[selected].correct ? "rgba(34,197,94,0.5)" : "rgba(239,68,68,0.5)"),
+              color: q.options[selected].correct ? "#15803D" : "#B91C1C",
               fontSize: 14, lineHeight: 1.5,
             }}
           >

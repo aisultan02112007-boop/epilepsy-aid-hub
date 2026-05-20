@@ -45,8 +45,8 @@ export function Navbar({
           zIndex: 50,
           backdropFilter: scrolled ? "blur(28px)" : "blur(16px)",
           WebkitBackdropFilter: scrolled ? "blur(28px)" : "blur(16px)",
-          background: scrolled ? "rgba(15,23,42,0.65)" : "rgba(15,23,42,0.35)",
-          borderBottom: "1px solid rgba(255,255,255,0.1)",
+          background: scrolled ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.6)",
+          borderBottom: "1px solid rgba(20,184,166,0.15)",
           transition: "all 0.3s ease",
         }}
       >
@@ -57,14 +57,14 @@ export function Navbar({
           <button
             onClick={() => onNavigate("home")}
             className="flex items-center gap-2.5"
-            style={{ background: "none", border: "none", cursor: "pointer", color: "#fff" }}
+            style={{ background: "none", border: "none", cursor: "pointer", color: "#0F172A" }}
           >
             <div
               className="flex items-center justify-center"
               style={{
                 width: 36, height: 36, borderRadius: 10,
-                background: "linear-gradient(135deg, #2563EB, #7C3AED)",
-                boxShadow: "0 4px 16px rgba(37,99,235,0.5)",
+                background: "linear-gradient(135deg, #14B8A6, #06B6D4)",
+                boxShadow: "0 4px 16px rgba(20,184,166,0.4)",
               }}
             >
               <HeartPulse size={18} color="#fff" strokeWidth={2.5} />
@@ -84,7 +84,7 @@ export function Navbar({
                   style={{
                     background: "none",
                     border: "none",
-                    color: isActive ? "#fff" : "rgba(255,255,255,0.65)",
+                    color: isActive ? "#0F766E" : "#475569",
                     fontWeight: isActive ? 700 : 500,
                     fontSize: 14,
                     padding: "10px 16px",
@@ -100,7 +100,7 @@ export function Navbar({
                         position: "absolute",
                         bottom: 2, left: "20%", right: "20%",
                         height: 2,
-                        background: "#60A5FA",
+                        background: "#14B8A6",
                         borderRadius: 2,
                       }}
                     />
@@ -116,9 +116,10 @@ export function Navbar({
               title={user?.name}
               style={{
                 width: 38, height: 38, borderRadius: "50%",
-                background: "linear-gradient(135deg, #2563EB, #7C3AED)",
+                background: "linear-gradient(135deg, #14B8A6, #06B6D4)",
                 color: "#fff", fontSize: 13, fontWeight: 700,
-                border: "1px solid rgba(255,255,255,0.25)",
+                border: "2px solid #fff",
+                boxShadow: "0 4px 14px rgba(20,184,166,0.35)",
                 cursor: "pointer",
               }}
             >
@@ -129,9 +130,9 @@ export function Navbar({
               title="Выйти"
               style={{
                 width: 38, height: 38, borderRadius: 10,
-                background: "rgba(255,255,255,0.08)",
-                border: "1px solid rgba(255,255,255,0.18)",
-                color: "rgba(255,255,255,0.8)",
+                background: "rgba(255,255,255,0.7)",
+                border: "1px solid rgba(148,163,184,0.35)",
+                color: "#475569",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 cursor: "pointer",
                 transition: "all 0.2s ease",
@@ -146,9 +147,9 @@ export function Navbar({
             onClick={() => setOpen(true)}
             style={{
               width: 40, height: 40, borderRadius: 10,
-              background: "rgba(255,255,255,0.08)",
-              border: "1px solid rgba(255,255,255,0.18)",
-              color: "#fff",
+              background: "rgba(255,255,255,0.8)",
+              border: "1px solid rgba(148,163,184,0.35)",
+              color: "#0F172A",
               display: "flex", alignItems: "center", justifyContent: "center",
             }}
           >
