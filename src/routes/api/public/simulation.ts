@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import "@tanstack/react-start";
-import { generateText, Output } from "ai";
+import { generateText } from "ai";
 import { z } from "zod";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
 
@@ -17,23 +17,50 @@ const QuizSchema = z.object({
             correct: z.boolean(),
             explanation: z.string(),
           }))
-          .min(4).max(6),
+          .min(3).max(6),
       }),
     )
-    .min(8).max(12),
+    .min(6).max(12),
 });
 
-const PROMPT = `Сгенерируй 10 уникальных вопросов по первой помощи при эпилептическом приступе.
+const PROMPT = `Сгенерируй ровно 10 уникальных вопросов по первой помощи при эпилептическом приступе.
+
+Верни СТРОГО валидный JSON без markdown, без \`\`\`, без пояснений — только сам JSON-объект.
+
+Формат:
+{
+  "questions": [
+    {
+      "scenario": "Дома",
+      "question": "Текст вопроса?",
+      "hint": "Короткая подсказка.",
+      "options": [
+        {"text": "Вариант 1", "correct": true, "explanation": "Почему правильно."},
+        {"text": "Вариант 2", "correct": false, "explanation": "Почему неправильно."},
+        {"text": "Вариант 3", "correct": false, "explanation": "Почему неправильно."},
+        {"text": "Вариант 4", "correct": false, "explanation": "Почему неправильно."},
+        {"text": "Вариант 5", "correct": false, "explanation": "Почему неправильно."}
+      ]
+    }
+  ]
+}
 
 Требования:
-- Ровно 10 вопросов.
-- Каждый вопрос содержит "scenario" (короткий контекст — место/ситуация, напр. "Дома", "На улице", "В школе", "На работе", "В транспорте"), "question" (сам вопрос), "hint" (короткая обучающая подсказка) и "options".
-- Ровно 5 вариантов ответа. РОВНО один правильный (correct=true), четыре неправильных (correct=false).
-- Каждый вариант: "text", "correct" (boolean), "explanation" (почему правильно или неправильно).
-- Варьируй сценарии: дом, улица, школа, работа, транспорт.
-- Весь текст — на русском.
-- Медицински корректно: положить на бок, ничего в рот, засечь время, не удерживать силой, скорая если > 5 мин и т.д.
+- Ровно 10 вопросов, в каждом ровно 5 вариантов.
+- В каждом вопросе РОВНО один вариант с correct=true.
+- Сценарии варьируй: Дома, На улице, В школе, На работе, В транспорте.
+- Весь текст на русском.
+- Медицински корректно (положить на бок, ничего в рот, засечь время, не удерживать силой, скорая если приступ > 5 мин).
 - Не повторяй вопросы.`;
+
+function extractJson(text: string): string {
+  const fence = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fence) return fence[1].trim();
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start !== -1 && end !== -1) return text.slice(start, end + 1);
+  return text.trim();
+}
 
 export const Route = createFileRoute("/api/public/simulation")({
   server: {
@@ -48,15 +75,11 @@ export const Route = createFileRoute("/api/public/simulation")({
         try {
           const gateway = createLovableAiGatewayProvider(key);
           const model = gateway("google/gemini-2.5-flash");
-          const { experimental_output } = await generateText({
-            model,
-            experimental_output: Output.object({ schema: QuizSchema }),
-            prompt: PROMPT,
-          });
-          // Trim/pad to 10 questions for stable UI
-          const out = experimental_output as { questions: unknown[] };
-          out.questions = out.questions.slice(0, 10);
-          return Response.json(out);
+          const { text } = await generateText({ model, prompt: PROMPT });
+          const parsed = JSON.parse(extractJson(text));
+          const validated = QuizSchema.parse(parsed);
+          validated.questions = validated.questions.slice(0, 10);
+          return Response.json(validated);
         } catch (err) {
           const message = err instanceof Error ? err.message : "Unknown error";
           const status = /rate limit|429/i.test(message) ? 429 : /402|credit/i.test(message) ? 402 : 500;
