@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPublicWorkoutRouteImport } from './routes/api/public/workout'
 import { Route as ApiPublicSimulationRouteImport } from './routes/api/public/simulation'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicWorkoutRoute = ApiPublicWorkoutRouteImport.update({
+  id: '/api/public/workout',
+  path: '/api/public/workout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicSimulationRoute = ApiPublicSimulationRouteImport.update({
@@ -26,27 +32,31 @@ const ApiPublicSimulationRoute = ApiPublicSimulationRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/public/simulation': typeof ApiPublicSimulationRoute
+  '/api/public/workout': typeof ApiPublicWorkoutRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/public/simulation': typeof ApiPublicSimulationRoute
+  '/api/public/workout': typeof ApiPublicWorkoutRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api/public/simulation': typeof ApiPublicSimulationRoute
+  '/api/public/workout': typeof ApiPublicWorkoutRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/public/simulation'
+  fullPaths: '/' | '/api/public/simulation' | '/api/public/workout'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/public/simulation'
-  id: '__root__' | '/' | '/api/public/simulation'
+  to: '/' | '/api/public/simulation' | '/api/public/workout'
+  id: '__root__' | '/' | '/api/public/simulation' | '/api/public/workout'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiPublicSimulationRoute: typeof ApiPublicSimulationRoute
+  ApiPublicWorkoutRoute: typeof ApiPublicWorkoutRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/workout': {
+      id: '/api/public/workout'
+      path: '/api/public/workout'
+      fullPath: '/api/public/workout'
+      preLoaderRoute: typeof ApiPublicWorkoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/simulation': {
@@ -71,7 +88,18 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiPublicSimulationRoute: ApiPublicSimulationRoute,
+  ApiPublicWorkoutRoute: ApiPublicWorkoutRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
