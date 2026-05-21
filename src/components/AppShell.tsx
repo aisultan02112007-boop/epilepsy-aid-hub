@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Background } from "./Background";
 import { Navbar, type ViewKey } from "./Navbar";
 import { Home } from "./Home";
-import { Simulation } from "./Simulation";
-import { Diary } from "./Diary";
-import { Info } from "./Info";
+import { Workouts } from "./Workouts";
+import { Progress } from "./Progress";
+import { Nutrition } from "./Nutrition";
 import { Profile } from "./Profile";
 
 export function AppShell() {
@@ -15,9 +15,9 @@ export function AppShell() {
       <Navbar active={view} onNavigate={setView} />
       <main key={view} className="animate-fade-up">
         {view === "home" && <Home onNavigate={setView} />}
-        {view === "simulation" && <Simulation />}
-        {view === "diary" && <Diary />}
-        {view === "info" && <Info />}
+        {view === "workouts" && <Workouts />}
+        {view === "progress" && <Progress />}
+        {view === "nutrition" && <Nutrition />}
         {view === "profile" && <Profile />}
       </main>
     </>

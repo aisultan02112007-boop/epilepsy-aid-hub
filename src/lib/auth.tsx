@@ -11,8 +11,8 @@ type AuthCtx = {
 };
 
 const Ctx = createContext<AuthCtx | null>(null);
-const USERS_KEY = "epi_users";
-const SESSION_KEY = "epi_session";
+const USERS_KEY = "fit_users";
+const SESSION_KEY = "fit_session";
 
 function readUsers(): StoredUser[] {
   try { return JSON.parse(localStorage.getItem(USERS_KEY) || "[]"); } catch { return []; }

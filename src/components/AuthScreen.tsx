@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { HeartPulse } from "lucide-react";
+import { Dumbbell } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Background } from "./Background";
 
@@ -31,11 +31,11 @@ export function AuthScreen() {
                 background: "linear-gradient(135deg, #2563EB, #7C3AED)",
               }}
             >
-              <HeartPulse size={36} color="#fff" strokeWidth={2.4} />
+              <Dumbbell size={36} color="#fff" strokeWidth={2.4} />
             </div>
-            <h1 style={{ fontSize: 32, fontWeight: 800, letterSpacing: "-0.02em", color: "#1E293B" }}>MedCare</h1>
+            <h1 style={{ fontSize: 32, fontWeight: 800, letterSpacing: "-0.02em", color: "#1E293B" }}>FitKer</h1>
             <p className="text-soft mt-2" style={{ fontSize: 15 }}>
-              Научись помогать. Спаси жизнь.
+              Твой персональный фитнес-помощник
             </p>
           </div>
 
