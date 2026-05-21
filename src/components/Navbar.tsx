@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import { HeartPulse, LogOut, Menu, X } from "lucide-react";
+import { Dumbbell, LogOut, Menu, X } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
-export type ViewKey = "home" | "simulation" | "diary" | "info" | "profile";
+export type ViewKey = "home" | "workouts" | "progress" | "nutrition" | "profile";
 
 const NAV: { key: ViewKey; label: string }[] = [
   { key: "home", label: "Главная" },
-  { key: "simulation", label: "Симуляция" },
-  { key: "diary", label: "Дневник" },
-  { key: "info", label: "О болезни" },
+  { key: "workouts", label: "Тренировки" },
+  { key: "progress", label: "Прогресс" },
+  { key: "nutrition", label: "Питание" },
 ];
 
 export function Navbar({
@@ -67,10 +67,10 @@ export function Navbar({
                 boxShadow: "0 4px 16px rgba(20,184,166,0.4)",
               }}
             >
-              <HeartPulse size={18} color="#fff" strokeWidth={2.5} />
+              <Dumbbell size={18} color="#fff" strokeWidth={2.5} />
             </div>
             <span style={{ fontWeight: 800, fontSize: 18, letterSpacing: "-0.02em" }}>
-              MedCare
+              FitCare
             </span>
           </button>
 
