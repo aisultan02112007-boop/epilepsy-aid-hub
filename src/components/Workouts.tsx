@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Flame, Dumbbell, Scale, MapPin, Loader2, Sparkles, Save, Play, RefreshCw,
+  Flame, Dumbbell, Scale, Loader2, Sparkles, Save, Play, RefreshCw, MapPin,
   CheckCircle2, XCircle, Lightbulb, Trophy, Medal,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
@@ -15,7 +15,7 @@ const GOALS = [
   { id: "Набор массы", icon: Dumbbell, gradient: "linear-gradient(135deg, #2563EB, #7C3AED)" },
   { id: "Рекомпозиция тела", icon: Scale, gradient: "linear-gradient(135deg, #14B8A6, #06B6D4)" },
 ];
-const LOCATIONS = ["Домашние тренировки", "Зал"];
+const LOCATION = "Зал";
 const LEVELS = ["Новичок", "Средний", "Продвинутый"];
 const DAYS = [3, 4, 5];
 
@@ -55,7 +55,7 @@ export function Workouts() {
 
 function ProgramGenerator() {
   const [goal, setGoal] = useState<string>("");
-  const [location, setLocation] = useState<string>(LOCATIONS[0]);
+  
   const [experience, setExperience] = useState<string>(LEVELS[0]);
   const [days, setDays] = useState<number>(3);
   const [program, setProgram] = useState<Program | null>(null);
@@ -76,7 +76,7 @@ function ProgramGenerator() {
     try {
       const res = await fetch("/api/public/workout", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ goal, location, experience, days }),
+        body: JSON.stringify({ goal, location: LOCATION, experience, days }),
       });
       if (!res.ok) {
         const b = await res.json().catch(() => ({}));
@@ -260,14 +260,7 @@ function ProgramGenerator() {
       </section>
 
       {/* PARAMS */}
-      <section className="grid md:grid-cols-2 gap-4 mb-5">
-        <ChipGroup
-          label="Место тренировок"
-          icon={<MapPin size={16} color="#2563EB" />}
-          value={location}
-          setValue={setLocation}
-          options={LOCATIONS}
-        />
+      <section className="mb-5">
         <ChipGroup
           label="Уровень опыта"
           icon={<Dumbbell size={16} color="#2563EB" />}
