@@ -96,7 +96,7 @@ function ProgramGenerator() {
     return (
       <div className="glass-strong flex flex-col items-center justify-center animate-fade-up" style={{ padding: 60 }}>
         <Loader2 size={42} color="#2563EB" className="spin-slow" />
-        <p className="text-soft mt-4" style={{ fontWeight: 600 }}>FitKer AI создаёт твою программу...</p>
+        <p className="text-soft mt-4" style={{ fontWeight: 600 }}>FitCare AI создаёт твою программу...</p>
       </div>
     );
   }
@@ -185,11 +185,41 @@ function ProgramGenerator() {
 
   return (
     <div className="animate-fade-up">
-      <section className="mb-6">
-        <p style={{ color: "#2563EB", fontSize: 13, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-          Шаг 1 — Цель
-        </p>
-        <div className="grid md:grid-cols-3 gap-4 mt-3">
+      <section
+        className="glass-strong"
+        style={{
+          padding: 36,
+          background:
+            "linear-gradient(135deg, rgba(37,99,235,0.12), rgba(124,58,237,0.10)), rgba(255,255,255,0.75)",
+          marginBottom: 20,
+        }}
+      >
+        <div className="flex items-center gap-3 mb-2">
+          <div
+            className="flex items-center justify-center"
+            style={{
+              width: 44, height: 44, borderRadius: 14,
+              background: "linear-gradient(135deg, #2563EB, #7C3AED)",
+              boxShadow: "0 6px 18px rgba(37,99,235,0.4)",
+            }}
+          >
+            <Sparkles size={22} color="#fff" />
+          </div>
+          <div>
+            <h2 style={{ fontSize: 24, fontWeight: 900, color: "#0F172A", letterSpacing: "-0.02em" }}>
+              Собери свою программу
+            </h2>
+            <p className="text-soft" style={{ fontSize: 13 }}>Выбери цель и параметры — AI сделает остальное</p>
+          </div>
+        </div>
+      </section>
+
+      {/* GOAL */}
+      <section className="mb-5">
+        <h3 style={{ fontSize: 16, fontWeight: 800, color: "#0F172A", marginBottom: 12 }}>
+          Твоя цель
+        </h3>
+        <div className="grid md:grid-cols-3 gap-4">
           {GOALS.map((g) => {
             const Icon = g.icon;
             const active = goal === g.id;
@@ -199,37 +229,91 @@ function ProgramGenerator() {
                 onClick={() => setGoal(g.id)}
                 className="glass-card text-left"
                 style={{
-                  padding: 24, cursor: "pointer",
-                  borderColor: active ? "#2563EB" : undefined,
-                  boxShadow: active ? "0 12px 30px rgba(37,99,235,0.3)" : undefined,
+                  padding: 20, cursor: "pointer", position: "relative",
+                  border: active ? "2px solid #2563EB" : "1px solid rgba(255,255,255,0.85)",
+                  boxShadow: active ? "0 14px 34px rgba(37,99,235,0.32)" : undefined,
+                  transform: active ? "translateY(-4px)" : undefined,
                 }}
               >
-                <div className="flex items-center justify-center mb-3" style={{ width: 56, height: 56, borderRadius: 16, background: g.gradient, boxShadow: "0 8px 24px rgba(37,99,235,0.3)" }}>
-                  <Icon size={26} color="#fff" />
+                <div className="flex items-center gap-3">
+                  <div
+                    className="flex items-center justify-center"
+                    style={{ width: 48, height: 48, borderRadius: 14, background: g.gradient, boxShadow: "0 8px 20px rgba(37,99,235,0.25)" }}
+                  >
+                    <Icon size={22} color="#fff" />
+                  </div>
+                  <p style={{ fontWeight: 800, fontSize: 16, color: "#0F172A" }}>{g.id}</p>
                 </div>
-                <p style={{ fontWeight: 800, fontSize: 17, color: "#0F172A" }}>{g.id}</p>
+                {active && (
+                  <span style={{
+                    position: "absolute", top: 12, right: 12,
+                    width: 22, height: 22, borderRadius: "50%",
+                    background: "linear-gradient(135deg, #2563EB, #7C3AED)",
+                    color: "#fff", fontSize: 12, fontWeight: 800,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>✓</span>
+                )}
               </button>
             );
           })}
         </div>
       </section>
 
-      <section className="glass-strong" style={{ padding: 28 }}>
-        <p style={{ color: "#2563EB", fontSize: 13, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-          Шаг 2 — Параметры
-        </p>
-        <div className="grid md:grid-cols-3 gap-5 mt-4">
-          <SelectField label="Где" icon={<MapPin size={14} />} value={location} setValue={setLocation} options={LOCATIONS} />
-          <SelectField label="Опыт" icon={<Dumbbell size={14} />} value={experience} setValue={setExperience} options={LEVELS} />
-          <SelectField label="Дней в неделю" icon={<Sparkles size={14} />} value={String(days)} setValue={(v) => setDays(+v)} options={DAYS.map(String)} />
-        </div>
-
-        {error && <p style={{ color: "#DC2626", fontSize: 14, fontWeight: 600, marginTop: 16 }}>{error}</p>}
-
-        <button onClick={generate} className="btn-primary mt-6 w-full">
-          <Sparkles size={18} /> Сгенерировать программу
-        </button>
+      {/* PARAMS */}
+      <section className="grid md:grid-cols-2 gap-4 mb-5">
+        <ChipGroup
+          label="Место тренировок"
+          icon={<MapPin size={16} color="#2563EB" />}
+          value={location}
+          setValue={setLocation}
+          options={LOCATIONS}
+        />
+        <ChipGroup
+          label="Уровень опыта"
+          icon={<Dumbbell size={16} color="#2563EB" />}
+          value={experience}
+          setValue={setExperience}
+          options={LEVELS}
+        />
       </section>
+
+      <section className="glass-card mb-5" style={{ padding: 22 }}>
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <p className="label-muted" style={{ marginBottom: 2 }}>Дней в неделю</p>
+            <p style={{ fontSize: 32, fontWeight: 900, color: "#0F172A", lineHeight: 1 }}>
+              {days}<span className="text-soft" style={{ fontSize: 14, fontWeight: 600, marginLeft: 8 }}>тренировок</span>
+            </p>
+          </div>
+          <div className="flex gap-2">
+            {DAYS.map((d) => {
+              const active = days === d;
+              return (
+                <button
+                  key={d}
+                  onClick={() => setDays(d)}
+                  style={{
+                    width: 52, height: 52, borderRadius: 14, fontWeight: 800, fontSize: 18,
+                    background: active ? "linear-gradient(135deg, #2563EB, #7C3AED)" : "rgba(255,255,255,0.85)",
+                    color: active ? "#fff" : "#1E293B",
+                    border: "1px solid " + (active ? "transparent" : "rgba(148,163,184,0.4)"),
+                    boxShadow: active ? "0 8px 22px rgba(37,99,235,0.35)" : "none",
+                    cursor: "pointer", transition: "all 0.2s ease",
+                  }}
+                >
+                  {d}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {error && <p style={{ color: "#DC2626", fontSize: 14, fontWeight: 600, marginBottom: 12 }}>{error}</p>}
+
+      <button onClick={generate} className="btn-primary w-full" style={{ fontSize: 16, padding: "16px 28px" }}>
+        <Sparkles size={18} /> Сгенерировать программу
+      </button>
     </div>
   );
 }
@@ -242,26 +326,33 @@ function Pill({ children }: { children: React.ReactNode }) {
   );
 }
 
-function SelectField({ label, icon, value, setValue, options }: { label: string; icon: React.ReactNode; value: string; setValue: (v: string) => void; options: string[] }) {
+function ChipGroup({ label, icon, value, setValue, options }: { label: string; icon: React.ReactNode; value: string; setValue: (v: string) => void; options: string[] }) {
   return (
-    <div>
-      <label className="label-muted block mb-1.5 flex items-center gap-1.5">{icon} {label}</label>
+    <div className="glass-card" style={{ padding: 20 }}>
+      <div className="flex items-center gap-2 mb-3">
+        {icon}
+        <span style={{ fontWeight: 700, color: "#0F172A", fontSize: 14 }}>{label}</span>
+      </div>
       <div className="flex flex-wrap gap-2">
-        {options.map((o) => (
-          <button
-            key={o}
-            onClick={() => setValue(o)}
-            style={{
-              padding: "10px 14px", borderRadius: 10, fontWeight: 600, fontSize: 13,
-              background: value === o ? "linear-gradient(135deg, #2563EB, #7C3AED)" : "rgba(255,255,255,0.85)",
-              color: value === o ? "#fff" : "#1E293B",
-              border: "1px solid " + (value === o ? "transparent" : "rgba(148,163,184,0.4)"),
-              cursor: "pointer",
-            }}
-          >
-            {o}
-          </button>
-        ))}
+        {options.map((o) => {
+          const active = value === o;
+          return (
+            <button
+              key={o}
+              onClick={() => setValue(o)}
+              style={{
+                padding: "10px 16px", borderRadius: 999, fontWeight: 700, fontSize: 13,
+                background: active ? "linear-gradient(135deg, #2563EB, #7C3AED)" : "rgba(255,255,255,0.85)",
+                color: active ? "#fff" : "#1E293B",
+                border: "1px solid " + (active ? "transparent" : "rgba(148,163,184,0.4)"),
+                boxShadow: active ? "0 6px 18px rgba(37,99,235,0.3)" : "none",
+                cursor: "pointer", transition: "all 0.2s ease",
+              }}
+            >
+              {o}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -350,7 +441,7 @@ function Quiz() {
       <div className="animate-fade-up">
         <div className="glass-strong text-center" style={{ padding: 40 }}>
           <div
-            className="pulse-glow mx-auto mb-5 flex items-center justify-center"
+            className="soft-float mx-auto mb-5 flex items-center justify-center"
             style={{ width: 96, height: 96, borderRadius: 28, background: passed ? "linear-gradient(135deg, #16A34A, #22D3EE)" : "linear-gradient(135deg, #EF4444, #F59E0B)" }}
           >
             <Trophy size={44} color="#fff" />

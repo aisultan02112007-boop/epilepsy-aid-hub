@@ -19,7 +19,7 @@ export function Home({ onNavigate }: { onNavigate: (v: ViewKey) => void }) {
     <div className="mx-auto" style={{ maxWidth: 1200, padding: "100px 24px 80px" }}>
       <section className="min-h-[78vh] flex flex-col items-center justify-center text-center animate-fade-up">
         <div
-          className="pulse-glow mb-8 flex items-center justify-center"
+          className="soft-float mb-8 flex items-center justify-center"
           style={{ width: 120, height: 120, borderRadius: 36, background: "linear-gradient(135deg, #2563EB, #7C3AED)" }}
         >
           <Dumbbell size={56} color="#fff" strokeWidth={2.2} />
@@ -31,7 +31,7 @@ export function Home({ onNavigate }: { onNavigate: (v: ViewKey) => void }) {
             WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", maxWidth: 900,
           }}
         >
-          FitKer — Твой путь к лучшему телу
+          FitCare — Твой путь к лучшему телу
         </h1>
         <p className="text-soft mt-5" style={{ fontSize: 18, maxWidth: 640, lineHeight: 1.5 }}>
           Персональные тренировки, питание и геймификация в одном месте
@@ -78,7 +78,7 @@ export function Home({ onNavigate }: { onNavigate: (v: ViewKey) => void }) {
           <p className="text-soft mt-4" style={{ fontSize: 15, lineHeight: 1.6 }}>
             Ожирение — хроническое заболевание, при котором избыток жировой ткани негативно
             влияет на здоровье. ИМТ выше 30 считается ожирением. Правильные тренировки и
-            питание — главный инструмент борьбы с ним. <strong style={{ color: "#1E293B" }}>FitKer</strong> поможет тебе
+            питание — главный инструмент борьбы с ним. <strong style={{ color: "#1E293B" }}>FitCare</strong> поможет тебе
             выстроить систему.
           </p>
         </div>

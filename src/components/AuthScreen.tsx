@@ -25,7 +25,7 @@ export function AuthScreen() {
         <div className="glass-strong w-full animate-fade-up" style={{ maxWidth: 420, padding: 40 }}>
           <div className="flex flex-col items-center text-center mb-8">
             <div
-              className="pulse-glow flex items-center justify-center mb-5"
+              className="soft-float flex items-center justify-center mb-5"
               style={{
                 width: 76, height: 76, borderRadius: 22,
                 background: "linear-gradient(135deg, #2563EB, #7C3AED)",
@@ -33,7 +33,7 @@ export function AuthScreen() {
             >
               <Dumbbell size={36} color="#fff" strokeWidth={2.4} />
             </div>
-            <h1 style={{ fontSize: 32, fontWeight: 800, letterSpacing: "-0.02em", color: "#1E293B" }}>FitKer</h1>
+            <h1 style={{ fontSize: 32, fontWeight: 800, letterSpacing: "-0.02em", color: "#1E293B" }}>FitCare</h1>
             <p className="text-soft mt-2" style={{ fontSize: 15 }}>
               Твой персональный фитнес-помощник
             </p>

@@ -46,7 +46,7 @@ export function Navbar({
           backdropFilter: scrolled ? "blur(28px)" : "blur(16px)",
           WebkitBackdropFilter: scrolled ? "blur(28px)" : "blur(16px)",
           background: scrolled ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.6)",
-          borderBottom: "1px solid rgba(20,184,166,0.15)",
+          borderBottom: "1px solid rgba(37,99,235,0.15)",
           transition: "all 0.3s ease",
         }}
       >
@@ -63,8 +63,8 @@ export function Navbar({
               className="flex items-center justify-center"
               style={{
                 width: 36, height: 36, borderRadius: 10,
-                background: "linear-gradient(135deg, #14B8A6, #06B6D4)",
-                boxShadow: "0 4px 16px rgba(20,184,166,0.4)",
+                background: "linear-gradient(135deg, #2563EB, #7C3AED)",
+                boxShadow: "0 4px 16px rgba(37,99,235,0.4)",
               }}
             >
               <Dumbbell size={18} color="#fff" strokeWidth={2.5} />
@@ -84,7 +84,7 @@ export function Navbar({
                   style={{
                     background: "none",
                     border: "none",
-                    color: isActive ? "#0F766E" : "#475569",
+                    color: isActive ? "#2563EB" : "#475569",
                     fontWeight: isActive ? 700 : 500,
                     fontSize: 14,
                     padding: "10px 16px",
@@ -100,7 +100,7 @@ export function Navbar({
                         position: "absolute",
                         bottom: 2, left: "20%", right: "20%",
                         height: 2,
-                        background: "#14B8A6",
+                      background: "#2563EB",
                         borderRadius: 2,
                       }}
                     />
@@ -116,10 +116,10 @@ export function Navbar({
               title={user?.name}
               style={{
                 width: 38, height: 38, borderRadius: "50%",
-                background: "linear-gradient(135deg, #14B8A6, #06B6D4)",
+                background: "linear-gradient(135deg, #2563EB, #7C3AED)",
                 color: "#fff", fontSize: 13, fontWeight: 700,
                 border: "2px solid #fff",
-                boxShadow: "0 4px 14px rgba(20,184,166,0.35)",
+                boxShadow: "0 4px 14px rgba(37,99,235,0.4)",
                 cursor: "pointer",
               }}
             >
