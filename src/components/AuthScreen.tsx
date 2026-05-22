@@ -33,7 +33,7 @@ export function AuthScreen() {
             >
               <Dumbbell size={36} color="#fff" strokeWidth={2.4} />
             </div>
-            <h1 style={{ fontSize: 32, fontWeight: 800, letterSpacing: "-0.02em", color: "#1E293B" }}>FitKer</h1>
+            <h1 style={{ fontSize: 32, fontWeight: 800, letterSpacing: "-0.02em", color: "#1E293B" }}>FitCare</h1>
             <p className="text-soft mt-2" style={{ fontSize: 15 }}>
               Твой персональный фитнес-помощник
             </p>

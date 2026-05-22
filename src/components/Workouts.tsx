@@ -96,7 +96,7 @@ function ProgramGenerator() {
     return (
       <div className="glass-strong flex flex-col items-center justify-center animate-fade-up" style={{ padding: 60 }}>
         <Loader2 size={42} color="#2563EB" className="spin-slow" />
-        <p className="text-soft mt-4" style={{ fontWeight: 600 }}>FitKer AI создаёт твою программу...</p>
+        <p className="text-soft mt-4" style={{ fontWeight: 600 }}>FitCare AI создаёт твою программу...</p>
       </div>
     );
   }
