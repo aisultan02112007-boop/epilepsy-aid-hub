@@ -25,7 +25,7 @@ export function AuthScreen() {
         <div className="glass-strong w-full animate-fade-up" style={{ maxWidth: 420, padding: 40 }}>
           <div className="flex flex-col items-center text-center mb-8">
             <div
-              className="pulse-glow flex items-center justify-center mb-5"
+              className="soft-float flex items-center justify-center mb-5"
               style={{
                 width: 76, height: 76, borderRadius: 22,
                 background: "linear-gradient(135deg, #2563EB, #7C3AED)",

@@ -19,7 +19,7 @@ export function Home({ onNavigate }: { onNavigate: (v: ViewKey) => void }) {
     <div className="mx-auto" style={{ maxWidth: 1200, padding: "100px 24px 80px" }}>
       <section className="min-h-[78vh] flex flex-col items-center justify-center text-center animate-fade-up">
         <div
-          className="pulse-glow mb-8 flex items-center justify-center"
+          className="soft-float mb-8 flex items-center justify-center"
           style={{ width: 120, height: 120, borderRadius: 36, background: "linear-gradient(135deg, #2563EB, #7C3AED)" }}
         >
           <Dumbbell size={56} color="#fff" strokeWidth={2.2} />

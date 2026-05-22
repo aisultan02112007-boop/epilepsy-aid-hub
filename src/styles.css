@@ -213,5 +213,11 @@
 }
 .pulse-glow { animation: pulseGlow 2.4s ease-in-out infinite; }
 
+@keyframes softFloat {
+  0%, 100% { transform: translateY(0); box-shadow: 0 8px 24px rgba(37,99,235,0.28); }
+  50% { transform: translateY(-6px); box-shadow: 0 14px 32px rgba(37,99,235,0.35); }
+}
+.soft-float { animation: softFloat 3.6s ease-in-out infinite; }
+
 @keyframes spinSlow { to { transform: rotate(360deg); } }
 .spin-slow { animation: spinSlow 1s linear infinite; }

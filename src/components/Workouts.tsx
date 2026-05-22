@@ -350,7 +350,7 @@ function Quiz() {
       <div className="animate-fade-up">
         <div className="glass-strong text-center" style={{ padding: 40 }}>
           <div
-            className="pulse-glow mx-auto mb-5 flex items-center justify-center"
+            className="soft-float mx-auto mb-5 flex items-center justify-center"
             style={{ width: 96, height: 96, borderRadius: 28, background: passed ? "linear-gradient(135deg, #16A34A, #22D3EE)" : "linear-gradient(135deg, #EF4444, #F59E0B)" }}
           >
             <Trophy size={44} color="#fff" />
