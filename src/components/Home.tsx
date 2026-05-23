@@ -1,4 +1,4 @@
-import { Dumbbell, Flame, Trophy, BarChart3, Gamepad2, Apple, ArrowRight, Activity } from "lucide-react";
+import { Dumbbell, Flame, Trophy, BarChart3, Gamepad2, Apple, ArrowRight, Activity, BookOpen } from "lucide-react";
 import type { ViewKey } from "./Navbar";
 
 const STATS = [
@@ -31,7 +31,7 @@ export function Home({ onNavigate }: { onNavigate: (v: ViewKey) => void }) {
             WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", maxWidth: 900,
           }}
         >
-          FitCare — Твой путь к лучшему телу
+          FitCare — Твой персональный фитнес-помощник
         </h1>
         <p className="text-soft mt-5" style={{ fontSize: 18, maxWidth: 640, lineHeight: 1.5 }}>
           Персональные тренировки, питание и геймификация в одном месте
@@ -81,6 +81,13 @@ export function Home({ onNavigate }: { onNavigate: (v: ViewKey) => void }) {
             питание — главный инструмент борьбы с ним. <strong style={{ color: "#1E293B" }}>FitCare</strong> поможет тебе
             выстроить систему.
           </p>
+          <button
+            onClick={() => onNavigate("guide")}
+            className="btn-primary mt-6"
+            style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
+          >
+            <BookOpen size={18} /> Узнать больше
+          </button>
         </div>
         <div className="flex items-center justify-center">
           <div
