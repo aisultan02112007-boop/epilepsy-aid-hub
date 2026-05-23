@@ -5,6 +5,7 @@ import { Home } from "./Home";
 import { Workouts } from "./Workouts";
 import { Progress } from "./Progress";
 import { Nutrition } from "./Nutrition";
+import { Guide } from "./Guide";
 import { Profile } from "./Profile";
 
 export function AppShell() {
@@ -18,6 +19,7 @@ export function AppShell() {
         {view === "workouts" && <Workouts />}
         {view === "progress" && <Progress />}
         {view === "nutrition" && <Nutrition />}
+        {view === "guide" && <Guide />}
         {view === "profile" && <Profile />}
       </main>
     </>
