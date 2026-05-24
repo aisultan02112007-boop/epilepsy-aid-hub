@@ -4,7 +4,7 @@ import { Navbar, type ViewKey } from "./Navbar";
 import { Home } from "./Home";
 import { Workouts } from "./Workouts";
 import { Progress } from "./Progress";
-import { Nutrition } from "./Nutrition";
+import { Games } from "./Games";
 import { Guide } from "./Guide";
 import { Profile } from "./Profile";
 
@@ -17,8 +17,8 @@ export function AppShell() {
       <main key={view} className="animate-fade-up">
         {view === "home" && <Home onNavigate={setView} />}
         {view === "workouts" && <Workouts />}
+      {view === "games" && <Games />}
         {view === "progress" && <Progress />}
-        {view === "nutrition" && <Nutrition />}
         {view === "guide" && <Guide />}
         {view === "profile" && <Profile />}
       </main>
