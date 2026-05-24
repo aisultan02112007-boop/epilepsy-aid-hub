@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import { Dumbbell, LogOut, Menu, X } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
-export type ViewKey = "home" | "workouts" | "progress" | "nutrition" | "guide" | "profile";
+export type ViewKey = "home" | "workouts" | "games" | "progress" | "guide" | "profile";
 
 const NAV: { key: ViewKey; label: string }[] = [
   { key: "home", label: "Главная" },
-  { key: "workouts", label: "Тренировки" },
+  { key: "workouts", label: "Программы" },
+  { key: "games", label: "Игры" },
   { key: "progress", label: "Прогресс" },
-  { key: "nutrition", label: "Питание" },
   { key: "guide", label: "Гид" },
 ];
 
