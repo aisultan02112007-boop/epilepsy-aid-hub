@@ -4,6 +4,7 @@ export function Background() {
       <div className="app-orb app-orb-1" />
       <div className="app-orb app-orb-2" />
       <div className="app-orb app-orb-3" />
+      <div className="app-orb app-orb-4" />
     </div>
   );
 }
