@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Dumbbell, ArrowRight, Activity, BookOpen, Star, Users, MessageCircle, Sparkles, Cpu, Brain, Zap } from "lucide-react";
+import { Dumbbell, ArrowRight, Activity, BookOpen, Star, Users, MessageCircle, Sparkles } from "lucide-react";
 import type { ViewKey } from "./Navbar";
 
 type Metric = {
@@ -17,15 +17,15 @@ const METRICS: Metric[] = [
   { icon: MessageCircle, target: 120000, suffix: "+", label: "Участников сообщества" },
   { icon: Sparkles, target: 10000, suffix: "+", label: "AI-программ тренировок" },
   { icon: Star, target: 4.8, decimals: 1, label: "Рейтинг в App Store", stars: true },
-  { icon: Activity, target: 95, suffix: "%", label: "Положительных отзывов" },
 ];
 
 function easeOutQuad(t: number) { return 1 - (1 - t) * (1 - t); }
 
-function useCountUp(target: number, duration = 2500, decimals = 0) {
+function useCountUp(target: number, duration = 2500, decimals = 0, active = true) {
   const [val, setVal] = useState(0);
   const ran = useRef(false);
   useEffect(() => {
+    if (!active) return;
     if (ran.current) return;
     ran.current = true;
     const start = performance.now();
@@ -38,7 +38,7 @@ function useCountUp(target: number, duration = 2500, decimals = 0) {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [target, duration, decimals]);
+  }, [target, duration, decimals, active]);
   return val;
 }
 
@@ -48,38 +48,54 @@ function formatNum(n: number, decimals = 0) {
   return Math.floor(n).toString();
 }
 
-function MetricCard({ m, delay }: { m: Metric; delay: number }) {
+function MetricCard({ m }: { m: Metric }) {
   const Icon = m.icon;
-  const val = useCountUp(m.target, 2500, m.decimals ?? 0);
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          setVisible(true);
+          io.disconnect();
+        }
+      });
+    }, { threshold: 0.25 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  const val = useCountUp(m.target, 2200, m.decimals ?? 0, visible);
   return (
-    <div className="glass-card animate-fade-up" style={{ padding: 26, animationDelay: `${delay}s`, position: "relative", overflow: "hidden" }}>
+    <div ref={ref} style={{ padding: "4px 6px" }}>
       <div
-        className="flex items-center justify-center mb-4"
+        className="flex items-center justify-center mb-3"
         style={{
-          width: 52, height: 52, borderRadius: 14,
-          background: "linear-gradient(135deg, rgba(37,99,235,0.35), rgba(124,58,237,0.35))",
-          border: "1px solid rgba(255,255,255,0.6)",
+          width: 40, height: 40, borderRadius: 11,
+          background: "linear-gradient(135deg, rgba(37,99,235,0.3), rgba(124,58,237,0.3))",
+          border: "1px solid rgba(255,255,255,0.55)",
         }}
       >
-        <Icon size={24} color="#2563EB" />
+        <Icon size={18} color="#2563EB" />
       </div>
       <div className="flex items-baseline gap-1">
-        <span className="count-shine" style={{ fontSize: 36, fontWeight: 900, letterSpacing: "-0.03em", lineHeight: 1 }}>
+        <span className="count-shine" style={{ fontSize: "clamp(24px, 3vw, 30px)", fontWeight: 900, letterSpacing: "-0.03em", lineHeight: 1 }}>
           {formatNum(val, m.decimals ?? 0)}
         </span>
         {m.suffix && (
-          <span style={{ fontSize: 22, fontWeight: 800, color: "#2563EB" }}>{m.suffix}</span>
+          <span style={{ fontSize: 18, fontWeight: 800, color: "#2563EB" }}>{m.suffix}</span>
         )}
       </div>
       {m.stars && (
-        <div className="flex gap-0.5 mt-2">
+        <div className="flex gap-0.5 mt-1.5">
           {[0, 1, 2, 3, 4].map((i) => (
-            <Star key={i} size={14} fill="#FBBF24" color="#FBBF24"
-              style={{ filter: "drop-shadow(0 0 6px rgba(251,191,36,0.6))" }} />
+            <Star key={i} size={11} fill="#FBBF24" color="#FBBF24"
+              style={{ filter: "drop-shadow(0 0 4px rgba(251,191,36,0.55))" }} />
           ))}
         </div>
       )}
-      <p className="text-soft mt-2" style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.4 }}>{m.label}</p>
+      <p className="text-soft mt-1.5" style={{ fontSize: 12, fontWeight: 600, lineHeight: 1.4 }}>{m.label}</p>
     </div>
   );
 }
