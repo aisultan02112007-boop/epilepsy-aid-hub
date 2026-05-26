@@ -76,10 +76,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "FitCare — твой персональный фитнес-помощник." },
       { name: "author", content: "FitCare" },
       { property: "og:title", content: "FitCare" },
-      { property: "og:description", content: "Тренировки, питание и геймификация." },
+      { property: "og:description", content: "FitCare — твой персональный фитнес-помощник." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "FitCare" },
+      { name: "twitter:description", content: "FitCare — твой персональный фитнес-помощник." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/6c3b8370-1781-43b6-adfa-f5147a1c6953/id-preview-89c200c2--616321df-d87b-4121-89c6-9b42220d578f.lovable.app-1779793340061.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/6c3b8370-1781-43b6-adfa-f5147a1c6953/id-preview-89c200c2--616321df-d87b-4121-89c6-9b42220d578f.lovable.app-1779793340061.png" },
     ],
     links: [
       {
