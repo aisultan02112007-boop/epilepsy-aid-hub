@@ -133,20 +133,12 @@ export function Home({ onNavigate }: { onNavigate: (v: ViewKey) => void }) {
       </section>
 
       <section className="mt-12">
-        <div className="flex items-end justify-between flex-wrap gap-2 mb-5">
-          <div>
-            <p style={{ color: "#2563EB", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-              FitCare в цифрах
-            </p>
-            <h2 style={{ fontSize: 28, fontWeight: 800, color: "#0F172A", letterSpacing: "-0.02em", marginTop: 4 }}>
-              Сообщество, которому доверяют
-            </h2>
+        <div className="glass-card" style={{ padding: "22px 24px" }}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            {METRICS.map((m, i) => (
+              <MetricCard key={i} m={m} />
+            ))}
           </div>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {METRICS.map((m, i) => (
-            <MetricCard key={i} m={m} delay={i * 0.08} />
-          ))}
         </div>
       </section>
 
@@ -186,100 +178,42 @@ export function Home({ onNavigate }: { onNavigate: (v: ViewKey) => void }) {
         </div>
       </section>
 
-      {/* FIND YOUR PROGRAM — atmospheric, motivational */}
       <section className="mt-16 animate-fade-up">
-        <div className="text-center mb-8">
-          <p style={{ color: "#7C3AED", fontSize: 12, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase" }}>
-            AI Fitness Assistant
-          </p>
-          <h2 style={{ fontSize: "clamp(28px, 4vw, 40px)", fontWeight: 900, color: "#0F172A", letterSpacing: "-0.03em", marginTop: 6, lineHeight: 1.1 }}>
-            Найди свою программу
+        <div className="glass-card" style={{ padding: 32 }}>
+          <h2 style={{ fontSize: "clamp(22px, 3vw, 28px)", fontWeight: 800, color: "#0F172A", letterSpacing: "-0.02em", lineHeight: 1.2 }}>
+            ИИ Ассистент FitCare
           </h2>
-          <p className="text-soft mt-3" style={{ fontSize: 15, maxWidth: 560, margin: "12px auto 0" }}>
-            Твой код эволюции уже на 75% написан — осталось активировать персональный алгоритм.
+          <p className="text-soft mt-3" style={{ fontSize: 15, lineHeight: 1.6, maxWidth: 640 }}>
+            AI поможет тебе создать подходящую программу тренировок под твою цель, уровень и расписание.
+            Каждое упражнение будет подобрано так, чтобы реально давать результат.
           </p>
-        </div>
 
-        <div className="grid grid-cols-12 gap-4">
-          {/* Card 1 — tall */}
-          <div className="glass-card col-span-12 md:col-span-5 row-span-2" style={{ padding: 28, minHeight: 280, display: "flex", flexDirection: "column", justifyContent: "space-between", background: "linear-gradient(160deg, rgba(167,243,208,0.35), rgba(219,234,254,0.3) 60%, rgba(252,231,243,0.3))" }}>
-            <div>
-              <div className="flex items-center justify-center" style={{ width: 52, height: 52, borderRadius: 14, background: "linear-gradient(135deg, #2563EB, #7C3AED)", boxShadow: "0 8px 20px rgba(37,99,235,0.35)" }}>
-                <Brain size={24} color="#fff" />
-              </div>
-              <h3 style={{ fontSize: 22, fontWeight: 800, color: "#0F172A", marginTop: 18, letterSpacing: "-0.02em" }}>
-                Твой персональный алгоритм
-              </h3>
-              <p className="text-soft mt-2" style={{ fontSize: 14, lineHeight: 1.55 }}>
-                AI анализирует цель, опыт и расписание — и собирает программу, в которой каждое движение работает на результат.
-              </p>
-            </div>
-            <div className="flex items-center gap-2 mt-5">
-              <div style={{ flex: 1, height: 8, borderRadius: 999, background: "rgba(148,163,184,0.25)", overflow: "hidden" }}>
-                <div style={{ height: "100%", width: "75%", background: "linear-gradient(90deg, #2563EB, #7C3AED)", boxShadow: "0 0 14px rgba(37,99,235,0.55)" }} />
-              </div>
-              <span style={{ fontWeight: 800, color: "#2563EB", fontSize: 14 }}>75%</span>
-            </div>
+          <div className="flex items-center justify-between mt-6" style={{ fontSize: 13, fontWeight: 700, color: "#0F172A" }}>
+            <span style={{ color: "#475569" }}>Прогресс</span>
+            <span style={{ color: "#2563EB", fontWeight: 800 }}>75%</span>
+          </div>
+          <div style={{ height: 8, borderRadius: 999, background: "rgba(148,163,184,0.24)", overflow: "hidden", marginTop: 8 }}>
+            <div style={{ height: "100%", width: "75%", background: "linear-gradient(90deg, #2563EB, #7C3AED)", boxShadow: "0 0 14px rgba(37,99,235,0.5)", borderRadius: 999 }} />
           </div>
 
-          {/* Card 2 */}
-          <div className="glass-card col-span-12 md:col-span-7" style={{ padding: 26 }}>
-            <div className="flex items-start gap-4">
-              <div className="flex items-center justify-center" style={{ width: 52, height: 52, borderRadius: 14, background: "linear-gradient(135deg, #14B8A6, #06B6D4)", boxShadow: "0 8px 20px rgba(20,184,166,0.35)", flexShrink: 0 }}>
-                <Zap size={24} color="#fff" />
-              </div>
-              <div>
-                <h3 style={{ fontSize: 18, fontWeight: 800, color: "#0F172A", letterSpacing: "-0.02em" }}>
-                  Энергия, превращённая в форму
-                </h3>
-                <p className="text-soft mt-1.5" style={{ fontSize: 14, lineHeight: 1.55 }}>
-                  Каждая тренировка — заряд для тела и мозга. Меньше выгорания, больше прогресса.
-                </p>
-              </div>
-            </div>
+          <div className="mt-7">
+            <button
+              onClick={() => onNavigate("workouts")}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 10,
+                padding: "14px 26px",
+                borderRadius: 999,
+                border: "1px solid rgba(255,255,255,0.6)",
+                background: "linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)",
+                color: "#fff",
+                fontSize: 15, fontWeight: 700, letterSpacing: "-0.01em",
+                cursor: "pointer",
+                boxShadow: "0 10px 24px -8px rgba(37,99,235,0.55)",
+              }}
+            >
+              <Sparkles size={18} /> Создать свою программу <ArrowRight size={18} />
+            </button>
           </div>
-
-          {/* Card 3 */}
-          <div className="glass-card col-span-6 md:col-span-3" style={{ padding: 22, background: "linear-gradient(160deg, rgba(252,231,243,0.5), rgba(255,255,255,0.5))" }}>
-            <Cpu size={26} color="#7C3AED" />
-            <p style={{ fontSize: 13, fontWeight: 700, color: "#0F172A", marginTop: 12 }}>
-              Адаптивные нагрузки
-            </p>
-            <p className="text-soft mt-1" style={{ fontSize: 12, lineHeight: 1.5 }}>
-              Программа подстраивается под твой темп.
-            </p>
-          </div>
-
-          {/* Card 4 */}
-          <div className="glass-card col-span-6 md:col-span-4" style={{ padding: 22 }}>
-            <Sparkles size={26} color="#2563EB" />
-            <p style={{ fontSize: 13, fontWeight: 700, color: "#0F172A", marginTop: 12 }}>
-              Геймификация прогресса
-            </p>
-            <p className="text-soft mt-1" style={{ fontSize: 12, lineHeight: 1.5 }}>
-              XP, стрики, ачивки и глобальный рейтинг.
-            </p>
-          </div>
-        </div>
-
-        {/* Big pulsing CTA */}
-        <div className="flex justify-center mt-10">
-          <button
-            onClick={() => onNavigate("workouts")}
-            className="inner-glow"
-            style={{
-              display: "inline-flex", alignItems: "center", gap: 12,
-              padding: "20px 40px",
-              borderRadius: 999,
-              border: "1px solid rgba(255,255,255,0.6)",
-              background: "linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)",
-              color: "#fff",
-              fontSize: 17, fontWeight: 800, letterSpacing: "-0.01em",
-              cursor: "pointer",
-            }}
-          >
-            <Sparkles size={20} /> Активировать мой алгоритм <ArrowRight size={20} />
-          </button>
         </div>
       </section>
     </div>
