@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Dumbbell, LogOut, Menu } from "lucide-react";
+import { Dumbbell, LogOut, Menu, X } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 
 export type ViewKey = "home" | "workouts" | "games" | "progress" | "guide" | "profile";
@@ -31,7 +31,20 @@ export function Navbar({
     .toUpperCase();
 
   return (
-    <nav className="navbar-glass">
+    <nav
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 50,
+        backdropFilter: "blur(24px)",
+        WebkitBackdropFilter: "blur(24px)",
+        background: "rgba(255,255,255,0.7)",
+        borderBottom: "1px solid rgba(255,255,255,0.2)",
+        boxShadow: "0 6px 24px -12px rgba(15,23,42,0.12)",
+      }}
+    >
       <div
         className="mx-auto flex items-center justify-between"
         style={{ maxWidth: 1200, padding: "18px 24px" }}
@@ -45,7 +58,9 @@ export function Navbar({
           <div
             className="flex items-center justify-center"
             style={{
-              width: 36, height: 36, borderRadius: 10,
+              width: 36,
+              height: 36,
+              borderRadius: 10,
               background: "linear-gradient(135deg, #6D28D9, #7C3AED 55%, #2563EB)",
               boxShadow: "0 6px 18px rgba(109,40,217,0.4)",
             }}
@@ -90,7 +105,9 @@ export function Navbar({
                   <span
                     style={{
                       position: "absolute",
-                      bottom: 2, left: "18%", right: "18%",
+                      bottom: 2,
+                      left: "18%",
+                      right: "18%",
                       height: 2,
                       background: "linear-gradient(90deg, #6D28D9, #2563EB)",
                       borderRadius: 2,
@@ -108,9 +125,13 @@ export function Navbar({
             onClick={() => onNavigate("profile")}
             title={user?.name}
             style={{
-              width: 38, height: 38, borderRadius: "50%",
+              width: 38,
+              height: 38,
+              borderRadius: "50%",
               background: "linear-gradient(135deg, #2563EB, #7C3AED)",
-              color: "#fff", fontSize: 13, fontWeight: 700,
+              color: "#fff",
+              fontSize: 13,
+              fontWeight: 700,
               border: "2px solid #fff",
               boxShadow: "0 4px 14px rgba(37,99,235,0.4)",
               cursor: "pointer",
@@ -122,12 +143,18 @@ export function Navbar({
             onClick={logout}
             title="Выйти"
             style={{
-              height: 38, padding: "0 14px", borderRadius: 10,
+              height: 38,
+              padding: "0 14px",
+              borderRadius: 10,
               background: "rgba(255,255,255,0.7)",
               border: "1px solid rgba(148,163,184,0.35)",
               color: "#475569",
-              display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
-              fontSize: 13, fontWeight: 600,
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 6,
+              fontSize: 13,
+              fontWeight: 600,
               cursor: "pointer",
               transition: "all 0.2s ease",
             }}
@@ -148,7 +175,7 @@ export function Navbar({
             padding: "8px",
           }}
         >
-          <Menu size={24} strokeWidth={2} />
+          {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 
@@ -161,7 +188,14 @@ export function Navbar({
             backdropFilter: "blur(12px)",
           }}
         >
-          <div style={{ padding: "16px 24px", display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div
+            style={{
+              padding: "16px 24px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "12px",
+            }}
+          >
             {NAV.map((n) => {
               const isActive = active === n.key;
               return (
@@ -188,7 +222,15 @@ export function Navbar({
                 </button>
               );
             })}
-            <div style={{ borderTop: "1px solid rgba(148,163,184,0.2)", marginTop: "12px", paddingTop: "12px", display: "flex", gap: "8px" }}>
+            <div
+              style={{
+                borderTop: "1px solid rgba(148,163,184,0.2)",
+                marginTop: "12px",
+                paddingTop: "12px",
+                display: "flex",
+                gap: "8px",
+              }}
+            >
               <button
                 onClick={() => {
                   onNavigate("profile");
@@ -196,9 +238,13 @@ export function Navbar({
                 }}
                 title={user?.name}
                 style={{
-                  width: 38, height: 38, borderRadius: "50%",
+                  width: 38,
+                  height: 38,
+                  borderRadius: "50%",
                   background: "linear-gradient(135deg, #2563EB, #7C3AED)",
-                  color: "#fff", fontSize: 13, fontWeight: 700,
+                  color: "#fff",
+                  fontSize: 13,
+                  fontWeight: 700,
                   border: "2px solid #fff",
                   boxShadow: "0 4px 14px rgba(37,99,235,0.4)",
                   cursor: "pointer",
@@ -214,12 +260,18 @@ export function Navbar({
                 onClick={logout}
                 title="Выйти"
                 style={{
-                  height: 38, padding: "0 14px", borderRadius: 10,
+                  height: 38,
+                  padding: "0 14px",
+                  borderRadius: 10,
                   background: "rgba(255,255,255,0.7)",
                   border: "1px solid rgba(148,163,184,0.35)",
                   color: "#475569",
-                  display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
-                  fontSize: 13, fontWeight: 600,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 6,
+                  fontSize: 13,
+                  fontWeight: 600,
                   cursor: "pointer",
                   transition: "all 0.2s ease",
                   flex: 1,
