@@ -1,5 +1,4 @@
 import { useEffect, useState, useMemo, useRef } from "react";
-import { Plus } from "lucide-react";
 
 type Log = {
   date: string;
@@ -219,9 +218,6 @@ export function Progress() {
   const [userXP, setUserXP] = useState(450);
   const [currentRankIndex, setCurrentRankIndex] = useState(3);
   const [scrollY, setScrollY] = useState(0);
-  const [expandedLog, setExpandedLog] = useState<string | null>(null);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [weight, setWeight] = useState("");
   const [height, setHeight] = useState(170);
   const mapRef = useRef<HTMLDivElement>(null);
 
@@ -245,27 +241,6 @@ export function Progress() {
       return () => el.removeEventListener("scroll", handleScroll);
     }
   }, []);
-
-  const save = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!weight) return;
-    const entry: Log = {
-      date: today(),
-      weight: +weight,
-      waist: 0,
-      steps: 0,
-      water: 0,
-      calories: 0,
-      workout: false,
-      mood: 3,
-    };
-    const all = [entry, ...logs.filter((l) => l.date !== entry.date)];
-    all.sort((a, b) => b.date.localeCompare(a.date));
-    write(all);
-    setLogs(all);
-    setWeight("");
-    setShowAddForm(false);
-  };
 
   const currentRank = RANKS[currentRankIndex];
   const nextRank = currentRankIndex < RANKS.length - 1 ? RANKS[currentRankIndex + 1] : null;
@@ -589,77 +564,6 @@ export function Progress() {
         </div>
       </div>
 
-      {/* ============ FLOATING ACTION BUTTON ============ */}
-      <button
-        onClick={() => setShowAddForm(!showAddForm)}
-        style={{
-          position: "fixed",
-          bottom: 32,
-          right: 32,
-          width: 56,
-          height: 56,
-          borderRadius: "50%",
-          background: "linear-gradient(135deg, #2563EB, #7C3AED)",
-          border: "none",
-          color: "#fff",
-          fontSize: 24,
-          cursor: "pointer",
-          boxShadow: "0 4px 20px rgba(37, 99, 235, 0.4)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 999,
-          animation: "fab-pulse 2s ease-in-out infinite",
-        }}
-      >
-        +
-      </button>
-
-      {/* Add Weight Modal */}
-      {showAddForm && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0, 0, 0, 0.5)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "flex-end",
-            zIndex: 2000,
-            animation: "fadeIn 0.3s ease-out",
-          }}
-          onClick={() => setShowAddForm(false)}
-        >
-          <form
-            onSubmit={save}
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: "100%",
-              background: "rgba(255, 255, 255, 0.95)",
-              backdropFilter: "blur(12px)",
-              padding: 24,
-              borderRadius: "24px 24px 0 0",
-              animation: "slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-            }}
-          >
-            <h3 style={{ fontSize: 18, fontWeight: 700, color: "#0F172A", marginBottom: 16 }}>Log Weight</h3>
-            <input
-              type="number"
-              step="0.1"
-              placeholder="Enter weight (kg)"
-              value={weight}
-              onChange={(e) => setWeight(e.target.value)}
-              className="glass-input"
-              style={{ marginBottom: 12 }}
-              autoFocus
-            />
-            <button type="submit" className="btn-primary" style={{ width: "100%" }}>
-              <Plus size={18} /> Save Entry
-            </button>
-          </form>
-        </div>
-      )}
-
       {/* ============ GLOBAL ANIMATIONS ============ */}
       <style>{`
         @keyframes nodeBob {
@@ -706,11 +610,6 @@ export function Progress() {
         @keyframes fadeInDelay {
           from { opacity: 0; }
           to { opacity: 1; }
-        }
-
-        @keyframes fab-pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.1); }
         }
 
         @keyframes fadeIn {
