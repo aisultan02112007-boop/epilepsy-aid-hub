@@ -1,5 +1,5 @@
-import { useEffect, useState, useMemo } from "react";
-import { Scale, Ruler, Activity } from "lucide-react";
+import { useEffect, useState, useMemo, useRef } from "react";
+import { Plus } from "lucide-react";
 
 type Log = {
   date: string;
@@ -23,14 +23,12 @@ function read(): Log[] {
   }
 }
 
-function bmiInfo(w: number, hCm: number) {
-  if (!w || !hCm) return { v: 0, label: "—", color: "#94A3B8" };
-  const h = hCm / 100;
-  const v = +(w / (h * h)).toFixed(1);
-  if (v < 18.5) return { v, label: "Недостаточный вес", color: "#60A5FA" };
-  if (v < 25) return { v, label: "Норма", color: "#16A34A" };
-  if (v < 30) return { v, label: "Избыточный вес", color: "#F59E0B" };
-  return { v, label: "Ожирение", color: "#DC2626" };
+function write(l: Log[]) {
+  localStorage.setItem(KEY, JSON.stringify(l));
+}
+
+function today() {
+  return new Date().toISOString().slice(0, 10);
 }
 
 interface RankData {
@@ -41,7 +39,8 @@ interface RankData {
   glowColor: string;
   description: string;
   minXP: number;
-  icon: string;
+  animation: string;
+  quote: string;
 }
 
 const RANKS: RankData[] = [
@@ -50,10 +49,11 @@ const RANKS: RankData[] = [
     name: "Beginner",
     character: "👨‍🌾",
     color: "#A0AEC0",
-    glowColor: "rgba(160, 174, 192, 0.3)",
-    description: "Персонаж только начинает свой путь. Тело быстро устаёт, техника ещё не выстроена.",
+    glowColor: "rgba(160, 174, 192, 0.2)",
+    description: "Персонаж только начинает свой путь.",
     minXP: 0,
-    icon: "🏠",
+    animation: "none",
+    quote: "Начало — вот самый сложный шаг.",
   },
   {
     id: 2,
@@ -61,9 +61,10 @@ const RANKS: RankData[] = [
     character: "💂",
     color: "#8B4513",
     glowColor: "rgba(139, 69, 19, 0.4)",
-    description: "Персонаж входит в ритм тренировок. Появляется привычка к нагрузке.",
+    description: "Входит в ритм тренировок.",
     minXP: 100,
-    icon: "⚔️",
+    animation: "shadowPulse",
+    quote: "Дисциплина — это выбор каждый день.",
   },
   {
     id: 3,
@@ -71,9 +72,10 @@ const RANKS: RankData[] = [
     character: "👨‍🎓",
     color: "#B87333",
     glowColor: "rgba(184, 115, 51, 0.4)",
-    description: "Персонаж начинает понимать основы. Тренировки становятся осознанными.",
+    description: "Начинает понимать основы.",
     minXP: 250,
-    icon: "📚",
+    animation: "copperShimmer",
+    quote: "Знание приходит через практику.",
   },
   {
     id: 4,
@@ -81,9 +83,10 @@ const RANKS: RankData[] = [
     character: "⚔️",
     color: "#708090",
     glowColor: "rgba(112, 128, 144, 0.3)",
-    description: "Персонаж стабилизирует прогресс. Тело становится сильнее и выносливее.",
+    description: "Стабилизирует прогресс.",
     minXP: 400,
-    icon: "💪",
+    animation: "metallicHighlight",
+    quote: "Сила строится день за днём.",
   },
   {
     id: 5,
@@ -91,87 +94,136 @@ const RANKS: RankData[] = [
     character: "🛡️",
     color: "#2F4F4F",
     glowColor: "rgba(47, 79, 79, 0.4)",
-    description: "Ветеран — тот, кто прошёл через периоды лени и застоя.",
+    description: "Прошёл через испытания.",
     minXP: 600,
-    icon: "🏆",
+    animation: "cornerGradient",
+    quote: "Опыт — лучший учитель.",
   },
   {
     id: 6,
     name: "Master",
     character: "🥷",
-    color: "#C0C0C0",
-    glowColor: "rgba(0, 102, 255, 0.5)",
-    description: "Мастер — тот, кто научился управлять телом и контролировать нагрузку.",
+    color: "#0066FF",
+    glowColor: "rgba(0, 102, 255, 0.6)",
+    description: "Научился управлять телом.",
     minXP: 850,
-    icon: "🎯",
+    animation: "blueNeonGlow",
+    quote: "Мастер — это тот, кто никогда не бросает.",
   },
   {
     id: 7,
     name: "Pro",
     character: "🏇",
     color: "#FFD700",
-    glowColor: "rgba(255, 215, 0, 0.5)",
-    description: "Профи — чья форма стабильно высока. Подход системный и выверенный.",
+    glowColor: "rgba(255, 215, 0, 0.6)",
+    description: "Форма стабильно высока.",
     minXP: 1150,
-    icon: "👑",
+    animation: "goldenGlow",
+    quote: "Профессионализм видно издалека.",
   },
   {
     id: 8,
     name: "Elite",
     character: "🔱",
-    color: "#E5E4E2",
-    glowColor: "rgba(0, 255, 100, 0.5)",
-    description: "Элита — тот, кто довёл своё тело до максимума естественного развития.",
+    color: "#00FF64",
+    glowColor: "rgba(0, 255, 100, 0.6)",
+    description: "Естественный максимум развития.",
     minXP: 1500,
-    icon: "💎",
+    animation: "greenShimmer",
+    quote: "Элита редко, но неизбежно.",
   },
   {
     id: 9,
     name: "Champion",
     character: "🎖️",
-    color: "#8B0000",
-    glowColor: "rgba(255, 0, 0, 0.5)",
-    description: "Чемпион — тот, кто достиг высокой формы и научился её удерживать.",
+    color: "#FF0040",
+    glowColor: "rgba(255, 0, 64, 0.6)",
+    description: "Достиг и удерживает высоту.",
     minXP: 1900,
-    icon: "🌟",
+    animation: "redPulse",
+    quote: "Чемпион — это образ жизни.",
   },
   {
     id: 10,
     name: "Titan",
     character: "👹",
-    color: "#1a1a3a",
-    glowColor: "rgba(0, 100, 255, 0.6)",
-    description: "Титан — чья физическая мощь выходит за рамки обычного зала.",
+    color: "#0064FF",
+    glowColor: "rgba(0, 100, 255, 0.8)",
+    description: "Мощь выходит за пределы.",
     minXP: 2400,
-    icon: "⚡",
+    animation: "titanLightning",
+    quote: "Титаны не рождаются — они создаются.",
   },
   {
     id: 11,
     name: "Legend",
     character: "🐉",
-    color: "#2d1b4e",
-    glowColor: "rgba(255, 215, 0, 0.6)",
-    description: "Легендарный уровень — тот, чей путь стал примером для других.",
+    color: "#FFB000",
+    glowColor: "rgba(255, 176, 0, 0.7)",
+    description: "Путь стал примером для других.",
     minXP: 3000,
-    icon: "🔥",
+    animation: "legendStardust",
+    quote: "Легенды никогда не забываются.",
   },
   {
     id: 12,
     name: "Myth",
     character: "🌌",
-    color: "conic-gradient(from 0deg, #ff0080, #00ffff, #ff0080)",
-    glowColor: "rgba(255, 0, 255, 0.6)",
-    description: "Мифический уровень — тот, кто достиг предела возможного.",
+    color: "#FF00FF",
+    glowColor: "rgba(255, 0, 255, 0.8)",
+    description: "Предел возможного в естественном развитии.",
     minXP: 3600,
-    icon: "✨",
+    animation: "mythRainbow",
+    quote: "Легенды не рождаются — они выживают.",
   },
 ];
 
+// Pixel art fitness objects
+function PixelDumbbell() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 40 40" style={{ imageRendering: "pixelated" }}>
+      <rect x="6" y="14" width="4" height="12" fill="#C0A080" />
+      <rect x="10" y="10" width="4" height="20" fill="#8B7355" />
+      <rect x="14" y="8" width="12" height="24" fill="#654321" />
+      <rect x="26" y="10" width="4" height="20" fill="#8B7355" />
+      <rect x="30" y="14" width="4" height="12" fill="#C0A080" />
+    </svg>
+  );
+}
+
+function PixelKettlebell() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 40 40" style={{ imageRendering: "pixelated" }}>
+      <circle cx="20" cy="24" r="8" fill="#2F2F2F" />
+      <rect x="18" y="6" width="4" height="16" fill="#654321" />
+      <rect x="14" y="8" width="4" height="4" fill="#8B7355" />
+      <rect x="22" y="8" width="4" height="4" fill="#8B7355" />
+    </svg>
+  );
+}
+
+function PixelTrophy() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 40 40" style={{ imageRendering: "pixelated" }}>
+      <rect x="8" y="22" width="24" height="4" fill="#FFD700" />
+      <rect x="6" y="6" width="8" height="16" fill="#FFD700" />
+      <rect x="26" y="6" width="8" height="16" fill="#FFD700" />
+      <rect x="14" y="8" width="12" height="14" fill="#FFA500" />
+      <rect x="16" y="4" width="8" height="4" fill="#FFD700" />
+    </svg>
+  );
+}
+
 export function Progress() {
   const [logs, setLogs] = useState<Log[]>([]);
-  const [height, setHeight] = useState(170);
   const [userXP, setUserXP] = useState(450);
   const [currentRankIndex, setCurrentRankIndex] = useState(3);
+  const [scrollY, setScrollY] = useState(0);
+  const [expandedLog, setExpandedLog] = useState<string | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [weight, setWeight] = useState("");
+  const [height, setHeight] = useState(170);
+  const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setLogs(read());
@@ -181,8 +233,39 @@ export function Progress() {
     } catch {}
   }, []);
 
-  const last = logs[0];
-  const bmi = useMemo(() => bmiInfo(last?.weight || 0, height), [last, height]);
+  useEffect(() => {
+    const handleScroll = () => {
+      if (mapRef.current) {
+        setScrollY(mapRef.current.scrollTop);
+      }
+    };
+    const el = mapRef.current;
+    if (el) {
+      el.addEventListener("scroll", handleScroll);
+      return () => el.removeEventListener("scroll", handleScroll);
+    }
+  }, []);
+
+  const save = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!weight) return;
+    const entry: Log = {
+      date: today(),
+      weight: +weight,
+      waist: 0,
+      steps: 0,
+      water: 0,
+      calories: 0,
+      workout: false,
+      mood: 3,
+    };
+    const all = [entry, ...logs.filter((l) => l.date !== entry.date)];
+    all.sort((a, b) => b.date.localeCompare(a.date));
+    write(all);
+    setLogs(all);
+    setWeight("");
+    setShowAddForm(false);
+  };
 
   const currentRank = RANKS[currentRankIndex];
   const nextRank = currentRankIndex < RANKS.length - 1 ? RANKS[currentRankIndex + 1] : null;
@@ -191,226 +274,266 @@ export function Progress() {
     : 100;
 
   return (
-    <div style={{ minHeight: "100vh", padding: "100px 0 80px", background: "linear-gradient(180deg, #EEF4FF 0%, #F5ECFF 100%)" }}>
-      {/* ============ COMPACT DASHBOARD HEADER ============ */}
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", marginBottom: 40 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
-          {/* Weight Card */}
-          <div
-            className="glass-card"
-            style={{
-              padding: 24,
-              textAlign: "center",
-              background: "rgba(255, 255, 255, 0.65)",
-              backdropFilter: "blur(20px)",
-              border: "1px solid rgba(255, 255, 255, 0.85)",
-              borderRadius: 16,
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 8 }}>
-              <Scale size={20} color="#2563EB" style={{ marginRight: 8 }} />
-              <span style={{ fontSize: 12, fontWeight: 600, color: "#64748B" }}>Вес</span>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(180deg, #EEF4FF 0%, #F5ECFF 100%)", overflow: "hidden" }}>
+      {/* ============ STICKY XP BAR ============ */}
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 60,
+          background: "rgba(255, 255, 255, 0.95)",
+          backdropFilter: "blur(12px)",
+          borderBottom: `2px solid ${currentRank.glowColor}`,
+          zIndex: 1000,
+          padding: "12px 24px",
+          boxShadow: `0 0 20px ${currentRank.glowColor}`,
+        }}
+      >
+        <div style={{ maxWidth: 1200, margin: "0 auto", height: "100%" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, height: "100%" }}>
+            <div style={{ fontSize: 28 }}>{currentRank.character}</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#64748B", marginBottom: 4 }}>
+                {currentRank.name} {nextRank && `→ ${nextRank.name}`}
+              </div>
+              <div
+                style={{
+                  height: 6,
+                  borderRadius: 3,
+                  background: "rgba(148, 163, 184, 0.2)",
+                  overflow: "hidden",
+                  position: "relative",
+                }}
+              >
+                <div
+                  style={{
+                    height: "100%",
+                    background: `linear-gradient(90deg, ${currentRank.color}, ${currentRank.glowColor})`,
+                    width: `${progressPercent}%`,
+                    transition: "width 1.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                    boxShadow: `0 0 10px ${currentRank.glowColor}`,
+                  }}
+                />
+              </div>
             </div>
-            <p style={{ fontSize: 32, fontWeight: 900, color: "#0F172A" }}>
-              {last?.weight || "—"} <span style={{ fontSize: 14, color: "#94A3B8" }}>кг</span>
-            </p>
-          </div>
-
-          {/* Height Card */}
-          <div
-            className="glass-card"
-            style={{
-              padding: 24,
-              textAlign: "center",
-              background: "rgba(255, 255, 255, 0.65)",
-              backdropFilter: "blur(20px)",
-              border: "1px solid rgba(255, 255, 255, 0.85)",
-              borderRadius: 16,
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 8 }}>
-              <Ruler size={20} color="#7C3AED" style={{ marginRight: 8 }} />
-              <span style={{ fontSize: 12, fontWeight: 600, color: "#64748B" }}>Рост</span>
+            <div style={{ fontSize: 12, fontWeight: 700, color: currentRank.color, minWidth: 100, textAlign: "right" }}>
+              {userXP} / {nextRank?.minXP || 9999} XP
             </div>
-            <p style={{ fontSize: 32, fontWeight: 900, color: "#0F172A" }}>
-              {height} <span style={{ fontSize: 14, color: "#94A3B8" }}>см</span>
-            </p>
-            <input
-              type="number"
-              value={height}
-              onChange={(e) => {
-                const v = +e.target.value;
-                setHeight(v);
-                localStorage.setItem(PROFILE_KEY, JSON.stringify({ height: v }));
-              }}
-              style={{
-                width: 80,
-                marginTop: 8,
-                padding: "6px 8px",
-                borderRadius: 8,
-                border: "1px solid rgba(148, 163, 184, 0.4)",
-                background: "#fff",
-                fontSize: 12,
-              }}
-            />
-          </div>
-
-          {/* BMI Card */}
-          <div
-            className="glass-card"
-            style={{
-              padding: 24,
-              textAlign: "center",
-              background: "rgba(255, 255, 255, 0.65)",
-              backdropFilter: "blur(20px)",
-              border: "1px solid rgba(255, 255, 255, 0.85)",
-              borderRadius: 16,
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 8 }}>
-              <Activity size={20} color={bmi.color} style={{ marginRight: 8 }} />
-              <span style={{ fontSize: 12, fontWeight: 600, color: "#64748B" }}>BMI</span>
-            </div>
-            <p style={{ fontSize: 32, fontWeight: 900, color: bmi.color }}>{bmi.v || "—"}</p>
-            <p style={{ fontSize: 11, fontWeight: 600, color: bmi.color, marginTop: 4 }}>{bmi.label}</p>
           </div>
         </div>
       </div>
 
-      {/* ============ RPG PROGRESSION MAP ============ */}
-      <div style={{ maxWidth: 800, margin: "0 auto", padding: "0 24px" }}>
-        <div style={{ marginBottom: 32, textAlign: "center" }}>
-          <h1 style={{ fontSize: 36, fontWeight: 900, color: "#0F172A", marginBottom: 8 }}>Progression Journey</h1>
-          <p style={{ color: "#475569", fontSize: 14 }}>Advance through 12 ranks and become a fitness legend</p>
-        </div>
-
-        {/* Progression Map Container */}
+      {/* ============ FULLSCREEN PROGRESSION MAP ============ */}
+      <div
+        ref={mapRef}
+        style={{
+          marginTop: 60,
+          height: "calc(100vh - 60px)",
+          overflow: "auto",
+          position: "relative",
+          perspective: "1000px",
+        }}
+      >
+        {/* Background parallax effect */}
         <div
           style={{
-            position: "relative",
-            minHeight: "1400px",
-            background: "linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(220,200,255,0.2) 100%)",
-            borderRadius: 24,
-            border: "2px solid rgba(255,255,255,0.6)",
-            padding: 40,
-            overflow: "hidden",
+            position: "fixed",
+            top: 60,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "radial-gradient(circle at 50% 40%, rgba(37, 99, 235, 0.05) 0%, transparent 60%)",
+            pointerEvents: "none",
+            transform: `translateY(${scrollY * 0.5}px)`,
+            zIndex: 0,
           }}
-        >
-          {/* Winding Road Path */}
-          <svg
-            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none" }}
-            viewBox="0 0 400 1400"
-            preserveAspectRatio="none"
-          >
-            <defs>
-              <linearGradient id="roadGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="rgba(37, 99, 235, 0.15)" />
-                <stop offset="100%" stopColor="rgba(124, 58, 237, 0.15)" />
-              </linearGradient>
-            </defs>
-            {/* Curved winding road */}
-            <path
-              d="M 100 50 Q 150 120 100 200 Q 50 280 100 360 Q 150 440 100 520 Q 50 600 100 680 Q 150 760 100 840 Q 50 920 100 1000 Q 150 1080 100 1160"
-              fill="none"
-              stroke="url(#roadGradient)"
-              strokeWidth="60"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            {/* Road line separators */}
-            <path
-              d="M 100 50 Q 150 120 100 200 Q 50 280 100 360 Q 150 440 100 520 Q 50 600 100 680 Q 150 760 100 840 Q 50 920 100 1000 Q 150 1080 100 1160"
-              fill="none"
-              stroke="rgba(255, 255, 255, 0.4)"
-              strokeWidth="2"
-              strokeDasharray="20,10"
-              strokeLinecap="round"
-            />
-          </svg>
+        />
 
-          {/* Rank Nodes */}
-          <div style={{ position: "relative", zIndex: 10 }}>
+        {/* Floating particles */}
+        <div style={{ position: "fixed", top: 60, left: 0, right: 0, bottom: 0, pointerEvents: "none", zIndex: 1 }}>
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div
+              key={i}
+              style={{
+                position: "absolute",
+                left: `${Math.random() * 100}%`,
+                top: `${60 + Math.random() * window.innerHeight}px`,
+                width: 4,
+                height: 4,
+                borderRadius: "50%",
+                background: `rgba(37, 99, 235, ${0.1 + Math.random() * 0.2})`,
+                animation: `float ${6 + Math.random() * 4}s ease-in-out infinite`,
+                animationDelay: `${i * 0.5}s`,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Main Map Content */}
+        <div style={{ position: "relative", zIndex: 10, padding: "80px 40px 160px" }}>
+          <div style={{ maxWidth: 800, margin: "0 auto" }}>
+            {/* Animated SVG Road */}
+            <svg
+              style={{
+                position: "absolute",
+                left: "50%",
+                top: 0,
+                width: 200,
+                height: `${120 * RANKS.length}px`,
+                transform: "translateX(-50%)",
+                pointerEvents: "none",
+                zIndex: 2,
+              }}
+              viewBox="0 0 200 2000"
+              preserveAspectRatio="none"
+            >
+              <defs>
+                <linearGradient id="roadShimmer" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="rgba(37, 99, 235, 0)" />
+                  <stop offset="25%" stopColor={`${currentRank.glowColor}`} />
+                  <stop offset="50%" stopColor="rgba(37, 99, 235, 0)" />
+                </linearGradient>
+                <linearGradient id="roadGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="rgba(37, 99, 235, 0.2)" />
+                  <stop offset="100%" stopColor="rgba(124, 58, 237, 0.2)" />
+                </linearGradient>
+              </defs>
+              {/* Winding road path */}
+              <path
+                d="M 100 50 Q 150 120 100 200 Q 50 280 100 360 Q 150 440 100 520 Q 50 600 100 680 Q 150 760 100 840 Q 50 920 100 1000 Q 150 1080 100 1160 Q 50 1240 100 1320 Q 150 1400 100 1480 Q 50 1560 100 1640 Q 150 1720 100 1800"
+                fill="none"
+                stroke="url(#roadGradient)"
+                strokeWidth="40"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              {/* Animated dashed line */}
+              <path
+                d="M 100 50 Q 150 120 100 200 Q 50 280 100 360 Q 150 440 100 520 Q 50 600 100 680 Q 150 760 100 840 Q 50 920 100 1000 Q 150 1080 100 1160 Q 50 1240 100 1320 Q 150 1400 100 1480 Q 50 1560 100 1640 Q 150 1720 100 1800"
+                fill="none"
+                stroke="url(#roadShimmer)"
+                strokeWidth="40"
+                strokeDasharray="100,100"
+                strokeDashoffset="100"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{
+                  animation: "roadShimmer 4s linear infinite",
+                }}
+              />
+            </svg>
+
+            {/* Rank Nodes */}
             {RANKS.map((rank, idx) => {
               const isCurrentRank = idx === currentRankIndex;
               const isUnlocked = idx <= currentRankIndex;
-              const yOffset = idx * 110;
+              const yOffset = idx * 120;
+              const isLeft = idx % 2 === 0;
 
               return (
                 <div
                   key={rank.id}
                   style={{
-                    position: "absolute",
-                    top: `${50 + yOffset}px`,
-                    left: idx % 2 === 0 ? "20%" : "60%",
-                    transition: "all 0.3s ease",
+                    position: "relative",
+                    marginBottom: 100,
+                    display: "flex",
+                    justifyContent: isLeft ? "flex-start" : "flex-end",
+                    paddingLeft: isLeft ? 0 : 100,
+                    paddingRight: isLeft ? 100 : 0,
                     opacity: 1,
                   }}
                 >
-                  {/* Rank Card */}
+                  {/* Node Card */}
                   <div
+                    className={`rank-card rank-${rank.id} ${isCurrentRank ? "current" : ""} ${isUnlocked ? "unlocked" : "locked"}`}
                     style={{
-                      width: 220,
-                      padding: 16,
-                      borderRadius: 14,
-                      background: isUnlocked ? `rgba(255, 255, 255, 0.8)` : `rgba(200, 200, 200, 0.3)`,
-                      backdropFilter: "blur(12px)",
-                      border: `2px solid ${isUnlocked ? rank.glowColor : "rgba(148, 163, 184, 0.2)"}`,
-                      boxShadow: isCurrentRank
-                        ? `0 0 30px ${rank.glowColor}, inset 0 0 20px ${rank.glowColor}`
-                        : isUnlocked
-                        ? `0 4px 15px ${rank.glowColor}`
-                        : "0 2px 8px rgba(0,0,0,0.1)",
+                      width: 180,
                       textAlign: "center",
-                      cursor: isUnlocked ? "pointer" : "default",
-                      transform: isCurrentRank ? "scale(1.08)" : "scale(1)",
-                      transition: "all 0.3s ease",
+                      animation: isCurrentRank ? "nodeBob 3s ease-in-out infinite" : undefined,
+                      filter: !isUnlocked ? "grayscale(100%) blur(2px)" : undefined,
+                      opacity: !isUnlocked ? 0.5 : 1,
                     }}
                   >
                     {/* Lock Icon */}
                     {!isUnlocked && (
-                      <div
-                        style={{
-                          fontSize: 24,
-                          marginBottom: 8,
-                          filter: "drop-shadow(0 0 4px rgba(100,100,100,0.5))",
-                        }}
-                      >
+                      <div style={{ position: "absolute", top: 10, right: 10, fontSize: 20, opacity: 0.7, zIndex: 20 }}>
                         🔒
                       </div>
                     )}
 
-                    {/* Character */}
+                    {/* Pixel art object */}
                     <div
                       style={{
-                        fontSize: 40,
-                        marginBottom: 8,
-                        filter: isUnlocked ? `drop-shadow(0 0 8px ${rank.glowColor})` : "grayscale(100%)",
+                        height: 60,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: 12,
+                        animation:
+                          idx % 3 === 0
+                            ? "dumbbell-rock 2s ease-in-out infinite"
+                            : idx % 3 === 1
+                            ? "kettlebell-bounce 2s ease-in-out infinite"
+                            : "trophy-shimmer 3s ease-in-out infinite",
                       }}
                     >
-                      {rank.character}
+                      {idx % 3 === 0 && <PixelDumbbell />}
+                      {idx % 3 === 1 && <PixelKettlebell />}
+                      {idx % 3 === 2 && <PixelTrophy />}
                     </div>
 
-                    {/* Rank Name */}
-                    <h3
+                    {/* Rank Card */}
+                    <div
                       style={{
-                        fontSize: 14,
-                        fontWeight: 800,
-                        color: isUnlocked ? rank.color : "#94A3B8",
-                        marginBottom: 4,
+                        padding: 16,
+                        borderRadius: 12,
+                        background: isUnlocked ? "rgba(255, 255, 255, 0.85)" : "rgba(200, 200, 200, 0.3)",
+                        backdropFilter: "blur(12px)",
+                        border: `2px solid ${rank.glowColor}`,
+                        boxShadow: isCurrentRank
+                          ? `0 0 30px ${rank.glowColor}, inset 0 0 20px ${rank.glowColor}`
+                          : isUnlocked
+                          ? `0 4px 15px ${rank.glowColor}`
+                          : "0 2px 8px rgba(0,0,0,0.1)",
+                        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                        position: "relative",
+                        overflow: "hidden",
                       }}
                     >
-                      {rank.name}
-                    </h3>
-
-                    {/* XP Progress */}
-                    <div style={{ marginBottom: 10 }}>
+                      {/* Character emoji with idle animation */}
                       <div
                         style={{
-                          height: 6,
-                          borderRadius: 3,
+                          fontSize: 40,
+                          marginBottom: 8,
+                          filter: isUnlocked ? `drop-shadow(0 0 8px ${rank.glowColor})` : "grayscale(100%)",
+                          animation: "character-idle 3s ease-in-out infinite",
+                        }}
+                      >
+                        {rank.character}
+                      </div>
+
+                      {/* Rank name */}
+                      <h3
+                        style={{
+                          fontSize: 14,
+                          fontWeight: 800,
+                          color: isUnlocked ? rank.color : "#94A3B8",
+                          marginBottom: 8,
+                        }}
+                      >
+                        {rank.name}
+                      </h3>
+
+                      {/* Progress bar with animation */}
+                      <div
+                        style={{
+                          height: 4,
+                          borderRadius: 2,
                           background: "rgba(148, 163, 184, 0.2)",
                           overflow: "hidden",
-                          marginBottom: 4,
+                          marginBottom: 8,
                         }}
                       >
                         <div
@@ -418,75 +541,201 @@ export function Progress() {
                             height: "100%",
                             background: `linear-gradient(90deg, ${rank.color}, ${rank.glowColor})`,
                             width: isCurrentRank ? `${progressPercent}%` : isUnlocked ? "100%" : "0%",
-                            transition: "width 0.3s ease",
+                            transition: "width 1.2s cubic-bezier(0.4, 0, 0.2, 1)",
                           }}
                         />
                       </div>
-                      <p style={{ fontSize: 10, color: "#64748B", fontWeight: 600 }}>
-                        {isCurrentRank ? `${userXP} / ${nextRank?.minXP || 9999} XP` : isUnlocked ? "✓ Complete" : "Locked"}
-                      </p>
-                    </div>
 
-                    {/* Current Rank Button */}
-                    {isCurrentRank && (
-                      <button
-                        onClick={() => alert(`Continue with ${rank.name}!`)}
+                      {/* Quote with fade-in */}
+                      <p
                         style={{
-                          width: "100%",
-                          padding: "8px 12px",
-                          borderRadius: 8,
-                          background: `linear-gradient(135deg, ${rank.color}, ${rank.glowColor})`,
-                          border: "none",
-                          color: "#fff",
-                          fontWeight: 700,
                           fontSize: 11,
-                          cursor: "pointer",
-                          boxShadow: `0 0 12px ${rank.glowColor}`,
+                          fontStyle: "italic",
+                          color: "#475569",
+                          marginBottom: 12,
+                          animation: "fadeInDelay 1s ease-out 0.3s both",
+                          lineHeight: 1.4,
                         }}
                       >
-                        Continue →
-                      </button>
-                    )}
+                        "{rank.quote}"
+                      </p>
+
+                      {/* Continue button for current rank */}
+                      {isCurrentRank && (
+                        <button
+                          style={{
+                            width: "100%",
+                            padding: "8px 12px",
+                            borderRadius: 8,
+                            background: `linear-gradient(135deg, ${rank.color}, ${rank.glowColor})`,
+                            border: "none",
+                            color: "#fff",
+                            fontWeight: 700,
+                            fontSize: 12,
+                            cursor: "pointer",
+                            boxShadow: `0 0 12px ${rank.glowColor}`,
+                            animation: "shimmerSweep 3s ease-in-out infinite",
+                          }}
+                        >
+                          Continue →
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
         </div>
+      </div>
 
-        {/* Current Rank Details */}
-        {currentRank && (
-          <div
-            className="glass-strong"
+      {/* ============ FLOATING ACTION BUTTON ============ */}
+      <button
+        onClick={() => setShowAddForm(!showAddForm)}
+        style={{
+          position: "fixed",
+          bottom: 32,
+          right: 32,
+          width: 56,
+          height: 56,
+          borderRadius: "50%",
+          background: "linear-gradient(135deg, #2563EB, #7C3AED)",
+          border: "none",
+          color: "#fff",
+          fontSize: 24,
+          cursor: "pointer",
+          boxShadow: "0 4px 20px rgba(37, 99, 235, 0.4)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 999,
+          animation: "fab-pulse 2s ease-in-out infinite",
+        }}
+      >
+        +
+      </button>
+
+      {/* Add Weight Modal */}
+      {showAddForm && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0, 0, 0, 0.5)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "flex-end",
+            zIndex: 2000,
+            animation: "fadeIn 0.3s ease-out",
+          }}
+          onClick={() => setShowAddForm(false)}
+        >
+          <form
+            onSubmit={save}
+            onClick={(e) => e.stopPropagation()}
             style={{
-              marginTop: 40,
-              padding: 32,
-              borderRadius: 20,
-              background: "rgba(255, 255, 255, 0.75)",
+              width: "100%",
+              background: "rgba(255, 255, 255, 0.95)",
+              backdropFilter: "blur(12px)",
+              padding: 24,
+              borderRadius: "24px 24px 0 0",
+              animation: "slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
             }}
           >
-            <div style={{ display: "grid", gridTemplateColumns: "100px 1fr", gap: 24, alignItems: "center" }}>
-              <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 60, marginBottom: 8, filter: `drop-shadow(0 0 12px ${currentRank.glowColor})` }}>
-                  {currentRank.character}
-                </div>
-                <p style={{ fontSize: 12, fontWeight: 700, color: currentRank.color }}>{currentRank.name}</p>
-              </div>
-              <div>
-                <h2 style={{ fontSize: 24, fontWeight: 900, color: "#0F172A", marginBottom: 12 }}>
-                  {currentRank.name} Journey
-                </h2>
-                <p style={{ fontSize: 14, color: "#475569", lineHeight: 1.6, marginBottom: 16 }}>
-                  {currentRank.description}
-                </p>
-                <p style={{ fontSize: 13, fontWeight: 600, color: "#2563EB", marginBottom: 12 }}>
-                  Current XP: {userXP} {nextRank && `/ ${nextRank.minXP}`}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+            <h3 style={{ fontSize: 18, fontWeight: 700, color: "#0F172A", marginBottom: 16 }}>Log Weight</h3>
+            <input
+              type="number"
+              step="0.1"
+              placeholder="Enter weight (kg)"
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              className="glass-input"
+              style={{ marginBottom: 12 }}
+              autoFocus
+            />
+            <button type="submit" className="btn-primary" style={{ width: "100%" }}>
+              <Plus size={18} /> Save Entry
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* ============ GLOBAL ANIMATIONS ============ */}
+      <style>{`
+        @keyframes nodeBob {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-8px); }
+        }
+
+        @keyframes dumbbell-rock {
+          0%, 100% { transform: rotate(-5deg); }
+          50% { transform: rotate(5deg); }
+        }
+
+        @keyframes kettlebell-bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-6px); }
+        }
+
+        @keyframes trophy-shimmer {
+          0%, 100% { filter: brightness(1); }
+          50% { filter: brightness(1.2); }
+        }
+
+        @keyframes character-idle {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-4px); }
+        }
+
+        @keyframes roadShimmer {
+          0% { stroke-dashoffset: 100; }
+          100% { stroke-dashoffset: -1900; }
+        }
+
+        @keyframes float {
+          0% { transform: translateY(0) translateX(0); opacity: 0; }
+          50% { opacity: 1; }
+          100% { transform: translateY(-200px) translateX(20px); opacity: 0; }
+        }
+
+        @keyframes shimmerSweep {
+          0%, 100% { background-position: -200% 0; }
+          50% { background-position: 200% 0; }
+        }
+
+        @keyframes fadeInDelay {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        @keyframes fab-pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.1); }
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
+        }
+
+        .rank-card {
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .rank-card:hover {
+          transform: translateY(-8px);
+        }
+
+        svg {
+          image-rendering: pixelated;
+          image-rendering: crisp-edges;
+        }
+      `}</style>
     </div>
   );
 }
