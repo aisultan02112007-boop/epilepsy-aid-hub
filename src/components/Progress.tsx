@@ -1,33 +1,25 @@
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 
-type Log = {
-  date: string;
-  weight: number;
-  waist: number;
-  steps: number;
-  water: number;
-  calories: number;
-  workout: boolean;
-  mood: number;
-};
-
-const KEY = "fit_logs";
 const PROFILE_KEY = "fit_profile";
 
-function read(): Log[] {
+type ProfileMetrics = { weight: number; height: number };
+
+function readProfile(): ProfileMetrics {
   try {
-    return JSON.parse(localStorage.getItem(KEY) || "[]");
+    const p = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
+    return { weight: Number(p.weight) || 70, height: Number(p.height) || 175 };
   } catch {
-    return [];
+    return { weight: 70, height: 175 };
   }
 }
 
-function write(l: Log[]) {
-  localStorage.setItem(KEY, JSON.stringify(l));
-}
-
-function today() {
-  return new Date().toISOString().slice(0, 10);
+function writeProfile(p: ProfileMetrics) {
+  try {
+    const prev = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
+    localStorage.setItem(PROFILE_KEY, JSON.stringify({ ...prev, ...p }));
+  } catch {
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(p));
+  }
 }
 
 interface RankData {
@@ -214,20 +206,28 @@ function PixelTrophy() {
 }
 
 export function Progress() {
-  const [logs, setLogs] = useState<Log[]>([]);
   const [userXP, setUserXP] = useState(450);
   const [currentRankIndex, setCurrentRankIndex] = useState(3);
   const [scrollY, setScrollY] = useState(0);
-  const [height, setHeight] = useState(170);
+  const [metrics, setMetrics] = useState<ProfileMetrics>({ weight: 70, height: 175 });
+  const [editing, setEditing] = useState<null | "weight" | "height">(null);
   const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setLogs(read());
-    try {
-      const p = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
-      if (p?.height) setHeight(p.height);
-    } catch {}
+    setMetrics(readProfile());
   }, []);
+
+  const bmi = metrics.height > 0 ? metrics.weight / Math.pow(metrics.height / 100, 2) : 0;
+  const bmiLabel =
+    bmi < 18.5 ? "Низкий" : bmi < 25 ? "Норма" : bmi < 30 ? "Избыток" : "Высокий";
+  const bmiColor =
+    bmi < 18.5 ? "#60A5FA" : bmi < 25 ? "#10B981" : bmi < 30 ? "#F59E0B" : "#EF4444";
+
+  const updateMetric = (k: "weight" | "height", v: number) => {
+    const next = { ...metrics, [k]: v };
+    setMetrics(next);
+    writeProfile(next);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -300,12 +300,115 @@ export function Progress() {
         </div>
       </div>
 
+      {/* ============ COMPACT DASHBOARD HEADER (weight / height / BMI) ============ */}
+      <div
+        style={{
+          position: "fixed",
+          top: 60,
+          left: 0,
+          right: 0,
+          height: 64,
+          zIndex: 999,
+          padding: "10px 24px",
+          background: "rgba(255,255,255,0.85)",
+          backdropFilter: "blur(14px)",
+          borderBottom: "1px solid rgba(148,163,184,0.18)",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 1200,
+            margin: "0 auto",
+            height: "100%",
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr",
+            gap: 10,
+          }}
+        >
+          {[
+            { key: "weight" as const, label: "Вес", value: metrics.weight, unit: "кг", icon: "⚖️", accent: "#2563EB" },
+            { key: "height" as const, label: "Рост", value: metrics.height, unit: "см", icon: "📏", accent: "#7C3AED" },
+          ].map((m) => (
+            <div
+              key={m.key}
+              onClick={() => setEditing(m.key)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "0 14px",
+                borderRadius: 12,
+                background: "rgba(255,255,255,0.7)",
+                border: "1px solid rgba(148,163,184,0.2)",
+                cursor: "pointer",
+                transition: "all 0.2s",
+              }}
+            >
+              <div style={{ fontSize: 18 }}>{m.icon}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: "#64748B", textTransform: "uppercase", letterSpacing: 0.4 }}>
+                  {m.label}
+                </div>
+                {editing === m.key ? (
+                  <input
+                    autoFocus
+                    type="number"
+                    value={m.value}
+                    onChange={(e) => updateMetric(m.key, Number(e.target.value))}
+                    onBlur={() => setEditing(null)}
+                    onKeyDown={(e) => e.key === "Enter" && setEditing(null)}
+                    style={{
+                      width: "100%",
+                      fontSize: 16,
+                      fontWeight: 800,
+                      color: m.accent,
+                      border: "none",
+                      outline: "none",
+                      background: "transparent",
+                      padding: 0,
+                    }}
+                  />
+                ) : (
+                  <div style={{ fontSize: 16, fontWeight: 800, color: m.accent, lineHeight: 1.1 }}>
+                    {m.value}
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", marginLeft: 4 }}>{m.unit}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {/* BMI */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "0 14px",
+              borderRadius: 12,
+              background: `linear-gradient(135deg, ${bmiColor}14, ${bmiColor}06)`,
+              border: `1px solid ${bmiColor}40`,
+            }}
+          >
+            <div style={{ fontSize: 18 }}>🔥</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "#64748B", textTransform: "uppercase", letterSpacing: 0.4 }}>
+                ИМТ · {bmiLabel}
+              </div>
+              <div style={{ fontSize: 16, fontWeight: 800, color: bmiColor, lineHeight: 1.1 }}>
+                {bmi.toFixed(1)}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* ============ FULLSCREEN PROGRESSION MAP ============ */}
       <div
         ref={mapRef}
         style={{
-          marginTop: 60,
-          height: "calc(100vh - 60px)",
+          marginTop: 124,
+          height: "calc(100vh - 124px)",
           overflow: "auto",
           position: "relative",
           perspective: "1000px",
@@ -315,7 +418,7 @@ export function Progress() {
         <div
           style={{
             position: "fixed",
-            top: 60,
+            top: 124,
             left: 0,
             right: 0,
             bottom: 0,
