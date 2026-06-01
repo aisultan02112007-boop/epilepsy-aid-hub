@@ -217,6 +217,15 @@ export function Progress() {
     setMetrics(readProfile());
   }, []);
 
+  // Smooth scroll to current rank on mount
+  const currentNodeRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const t = setTimeout(() => {
+      currentNodeRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 300);
+    return () => clearTimeout(t);
+  }, []);
+
   const bmi = metrics.height > 0 ? metrics.weight / Math.pow(metrics.height / 100, 2) : 0;
   const bmiLabel =
     bmi < 18.5 ? "Низкий" : bmi < 25 ? "Норма" : bmi < 30 ? "Избыток" : "Высокий";
