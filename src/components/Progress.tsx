@@ -206,20 +206,28 @@ function PixelTrophy() {
 }
 
 export function Progress() {
-  const [logs, setLogs] = useState<Log[]>([]);
   const [userXP, setUserXP] = useState(450);
   const [currentRankIndex, setCurrentRankIndex] = useState(3);
   const [scrollY, setScrollY] = useState(0);
-  const [height, setHeight] = useState(170);
+  const [metrics, setMetrics] = useState<ProfileMetrics>({ weight: 70, height: 175 });
+  const [editing, setEditing] = useState<null | "weight" | "height">(null);
   const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setLogs(read());
-    try {
-      const p = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
-      if (p?.height) setHeight(p.height);
-    } catch {}
+    setMetrics(readProfile());
   }, []);
+
+  const bmi = metrics.height > 0 ? metrics.weight / Math.pow(metrics.height / 100, 2) : 0;
+  const bmiLabel =
+    bmi < 18.5 ? "Низкий" : bmi < 25 ? "Норма" : bmi < 30 ? "Избыток" : "Высокий";
+  const bmiColor =
+    bmi < 18.5 ? "#60A5FA" : bmi < 25 ? "#10B981" : bmi < 30 ? "#F59E0B" : "#EF4444";
+
+  const updateMetric = (k: "weight" | "height", v: number) => {
+    const next = { ...metrics, [k]: v };
+    setMetrics(next);
+    writeProfile(next);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
