@@ -304,8 +304,8 @@ export function Progress() {
       <div
         ref={mapRef}
         style={{
-          marginTop: 60,
-          height: "calc(100vh - 60px)",
+          marginTop: 124,
+          height: "calc(100vh - 124px)",
           overflow: "auto",
           position: "relative",
           perspective: "1000px",
@@ -315,7 +315,7 @@ export function Progress() {
         <div
           style={{
             position: "fixed",
-            top: 60,
+            top: 124,
             left: 0,
             right: 0,
             bottom: 0,
