@@ -768,6 +768,11 @@ export function Progress() {
           50% { transform: translateY(-8px); }
         }
 
+        @keyframes auraPulse {
+          0%, 100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.15; }
+          50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.45; }
+        }
+
         @keyframes dumbbell-rock {
           0%, 100% { transform: rotate(-5deg); }
           50% { transform: rotate(5deg); }
