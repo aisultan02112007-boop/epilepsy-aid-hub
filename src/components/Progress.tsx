@@ -300,6 +300,109 @@ export function Progress() {
         </div>
       </div>
 
+      {/* ============ COMPACT DASHBOARD HEADER (weight / height / BMI) ============ */}
+      <div
+        style={{
+          position: "fixed",
+          top: 60,
+          left: 0,
+          right: 0,
+          height: 64,
+          zIndex: 999,
+          padding: "10px 24px",
+          background: "rgba(255,255,255,0.85)",
+          backdropFilter: "blur(14px)",
+          borderBottom: "1px solid rgba(148,163,184,0.18)",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 1200,
+            margin: "0 auto",
+            height: "100%",
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr",
+            gap: 10,
+          }}
+        >
+          {[
+            { key: "weight" as const, label: "Вес", value: metrics.weight, unit: "кг", icon: "⚖️", accent: "#2563EB" },
+            { key: "height" as const, label: "Рост", value: metrics.height, unit: "см", icon: "📏", accent: "#7C3AED" },
+          ].map((m) => (
+            <div
+              key={m.key}
+              onClick={() => setEditing(m.key)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "0 14px",
+                borderRadius: 12,
+                background: "rgba(255,255,255,0.7)",
+                border: "1px solid rgba(148,163,184,0.2)",
+                cursor: "pointer",
+                transition: "all 0.2s",
+              }}
+            >
+              <div style={{ fontSize: 18 }}>{m.icon}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: "#64748B", textTransform: "uppercase", letterSpacing: 0.4 }}>
+                  {m.label}
+                </div>
+                {editing === m.key ? (
+                  <input
+                    autoFocus
+                    type="number"
+                    value={m.value}
+                    onChange={(e) => updateMetric(m.key, Number(e.target.value))}
+                    onBlur={() => setEditing(null)}
+                    onKeyDown={(e) => e.key === "Enter" && setEditing(null)}
+                    style={{
+                      width: "100%",
+                      fontSize: 16,
+                      fontWeight: 800,
+                      color: m.accent,
+                      border: "none",
+                      outline: "none",
+                      background: "transparent",
+                      padding: 0,
+                    }}
+                  />
+                ) : (
+                  <div style={{ fontSize: 16, fontWeight: 800, color: m.accent, lineHeight: 1.1 }}>
+                    {m.value}
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", marginLeft: 4 }}>{m.unit}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {/* BMI */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "0 14px",
+              borderRadius: 12,
+              background: `linear-gradient(135deg, ${bmiColor}14, ${bmiColor}06)`,
+              border: `1px solid ${bmiColor}40`,
+            }}
+          >
+            <div style={{ fontSize: 18 }}>🔥</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "#64748B", textTransform: "uppercase", letterSpacing: 0.4 }}>
+                ИМТ · {bmiLabel}
+              </div>
+              <div style={{ fontSize: 16, fontWeight: 800, color: bmiColor, lineHeight: 1.1 }}>
+                {bmi.toFixed(1)}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* ============ FULLSCREEN PROGRESSION MAP ============ */}
       <div
         ref={mapRef}
