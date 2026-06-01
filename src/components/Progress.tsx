@@ -480,7 +480,7 @@ export function Progress() {
                 position: "absolute",
                 left: "50%",
                 top: 0,
-                width: 200,
+                width: 240,
                 height: `${120 * RANKS.length}px`,
                 transform: "translateX(-50%)",
                 pointerEvents: "none",
@@ -491,36 +491,66 @@ export function Progress() {
             >
               <defs>
                 <linearGradient id="roadShimmer" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="rgba(37, 99, 235, 0)" />
-                  <stop offset="25%" stopColor={`${currentRank.glowColor}`} />
-                  <stop offset="50%" stopColor="rgba(37, 99, 235, 0)" />
+                  <stop offset="0%" stopColor="rgba(255,255,255,0)" />
+                  <stop offset="50%" stopColor="rgba(255,255,255,0.8)" />
+                  <stop offset="100%" stopColor="rgba(255,255,255,0)" />
                 </linearGradient>
-                <linearGradient id="roadGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="rgba(37, 99, 235, 0.2)" />
-                  <stop offset="100%" stopColor="rgba(124, 58, 237, 0.2)" />
+                <linearGradient id="roadEdge" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#C7D2FE" />
+                  <stop offset="50%" stopColor="#A5B4FC" />
+                  <stop offset="100%" stopColor="#DDD6FE" />
                 </linearGradient>
+                <linearGradient id="roadAsphalt" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#EEF2FF" />
+                  <stop offset="50%" stopColor="#F8FAFF" />
+                  <stop offset="100%" stopColor="#F5F3FF" />
+                </linearGradient>
+                <filter id="roadShadow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="6" stdDeviation="8" floodColor="#1E293B" floodOpacity="0.10"/>
+                </filter>
               </defs>
-              {/* Winding road path */}
+              {/* Road edge (outer) */}
               <path
                 d="M 100 50 Q 150 120 100 200 Q 50 280 100 360 Q 150 440 100 520 Q 50 600 100 680 Q 150 760 100 840 Q 50 920 100 1000 Q 150 1080 100 1160 Q 50 1240 100 1320 Q 150 1400 100 1480 Q 50 1560 100 1640 Q 150 1720 100 1800"
                 fill="none"
-                stroke="url(#roadGradient)"
-                strokeWidth="40"
+                stroke="url(#roadEdge)"
+                strokeWidth="64"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                filter="url(#roadShadow)"
+              />
+              {/* Asphalt surface */}
+              <path
+                d="M 100 50 Q 150 120 100 200 Q 50 280 100 360 Q 150 440 100 520 Q 50 600 100 680 Q 150 760 100 840 Q 50 920 100 1000 Q 150 1080 100 1160 Q 50 1240 100 1320 Q 150 1400 100 1480 Q 50 1560 100 1640 Q 150 1720 100 1800"
+                fill="none"
+                stroke="url(#roadAsphalt)"
+                strokeWidth="50"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
-              {/* Animated dashed line */}
+              {/* Center dashed lane */}
+              <path
+                d="M 100 50 Q 150 120 100 200 Q 50 280 100 360 Q 150 440 100 520 Q 50 600 100 680 Q 150 760 100 840 Q 50 920 100 1000 Q 150 1080 100 1160 Q 50 1240 100 1320 Q 150 1400 100 1480 Q 50 1560 100 1640 Q 150 1720 100 1800"
+                fill="none"
+                stroke={currentRank.color}
+                strokeOpacity="0.5"
+                strokeWidth="3"
+                strokeDasharray="14,18"
+                strokeLinecap="round"
+              />
+              {/* Animated shimmer overlay */}
               <path
                 d="M 100 50 Q 150 120 100 200 Q 50 280 100 360 Q 150 440 100 520 Q 50 600 100 680 Q 150 760 100 840 Q 50 920 100 1000 Q 150 1080 100 1160 Q 50 1240 100 1320 Q 150 1400 100 1480 Q 50 1560 100 1640 Q 150 1720 100 1800"
                 fill="none"
                 stroke="url(#roadShimmer)"
-                strokeWidth="40"
-                strokeDasharray="100,100"
+                strokeWidth="50"
+                strokeDasharray="120,1880"
                 strokeDashoffset="100"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 style={{
-                  animation: "roadShimmer 4s linear infinite",
+                  animation: "roadShimmer 6s linear infinite",
+                  mixBlendMode: "overlay",
                 }}
               />
             </svg>
