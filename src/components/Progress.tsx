@@ -217,6 +217,15 @@ export function Progress() {
     setMetrics(readProfile());
   }, []);
 
+  // Smooth scroll to current rank on mount
+  const currentNodeRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const t = setTimeout(() => {
+      currentNodeRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 300);
+    return () => clearTimeout(t);
+  }, []);
+
   const bmi = metrics.height > 0 ? metrics.weight / Math.pow(metrics.height / 100, 2) : 0;
   const bmiLabel =
     bmi < 18.5 ? "Низкий" : bmi < 25 ? "Норма" : bmi < 30 ? "Избыток" : "Высокий";
@@ -411,7 +420,11 @@ export function Progress() {
           height: "calc(100vh - 124px)",
           overflow: "auto",
           position: "relative",
-          perspective: "1000px",
+          perspective: "1400px",
+          perspectiveOrigin: "50% 0%",
+          scrollBehavior: "smooth",
+          background:
+            "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(167,243,208,0.35) 0%, transparent 60%), radial-gradient(ellipse 70% 50% at 50% 100%, rgba(196,181,253,0.3) 0%, transparent 60%), linear-gradient(180deg, #F0F7FF 0%, #F5ECFF 100%)",
         }}
       >
         {/* Background parallax effect */}
@@ -449,16 +462,25 @@ export function Progress() {
           ))}
         </div>
 
-        {/* Main Map Content */}
-        <div style={{ position: "relative", zIndex: 10, padding: "80px 40px 160px" }}>
-          <div style={{ maxWidth: 800, margin: "0 auto" }}>
+        {/* Main Map Content — isometric tilt */}
+        <div
+          style={{
+            position: "relative",
+            zIndex: 10,
+            padding: "80px 40px 200px",
+            transform: "rotateX(8deg)",
+            transformOrigin: "50% 0%",
+            transformStyle: "preserve-3d",
+          }}
+        >
+          <div style={{ maxWidth: 720, margin: "0 auto", position: "relative" }}>
             {/* Animated SVG Road */}
             <svg
               style={{
                 position: "absolute",
                 left: "50%",
                 top: 0,
-                width: 200,
+                width: 240,
                 height: `${120 * RANKS.length}px`,
                 transform: "translateX(-50%)",
                 pointerEvents: "none",
@@ -469,36 +491,66 @@ export function Progress() {
             >
               <defs>
                 <linearGradient id="roadShimmer" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="rgba(37, 99, 235, 0)" />
-                  <stop offset="25%" stopColor={`${currentRank.glowColor}`} />
-                  <stop offset="50%" stopColor="rgba(37, 99, 235, 0)" />
+                  <stop offset="0%" stopColor="rgba(255,255,255,0)" />
+                  <stop offset="50%" stopColor="rgba(255,255,255,0.8)" />
+                  <stop offset="100%" stopColor="rgba(255,255,255,0)" />
                 </linearGradient>
-                <linearGradient id="roadGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="rgba(37, 99, 235, 0.2)" />
-                  <stop offset="100%" stopColor="rgba(124, 58, 237, 0.2)" />
+                <linearGradient id="roadEdge" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#C7D2FE" />
+                  <stop offset="50%" stopColor="#A5B4FC" />
+                  <stop offset="100%" stopColor="#DDD6FE" />
                 </linearGradient>
+                <linearGradient id="roadAsphalt" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#EEF2FF" />
+                  <stop offset="50%" stopColor="#F8FAFF" />
+                  <stop offset="100%" stopColor="#F5F3FF" />
+                </linearGradient>
+                <filter id="roadShadow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="6" stdDeviation="8" floodColor="#1E293B" floodOpacity="0.10"/>
+                </filter>
               </defs>
-              {/* Winding road path */}
+              {/* Road edge (outer) */}
               <path
                 d="M 100 50 Q 150 120 100 200 Q 50 280 100 360 Q 150 440 100 520 Q 50 600 100 680 Q 150 760 100 840 Q 50 920 100 1000 Q 150 1080 100 1160 Q 50 1240 100 1320 Q 150 1400 100 1480 Q 50 1560 100 1640 Q 150 1720 100 1800"
                 fill="none"
-                stroke="url(#roadGradient)"
-                strokeWidth="40"
+                stroke="url(#roadEdge)"
+                strokeWidth="64"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                filter="url(#roadShadow)"
+              />
+              {/* Asphalt surface */}
+              <path
+                d="M 100 50 Q 150 120 100 200 Q 50 280 100 360 Q 150 440 100 520 Q 50 600 100 680 Q 150 760 100 840 Q 50 920 100 1000 Q 150 1080 100 1160 Q 50 1240 100 1320 Q 150 1400 100 1480 Q 50 1560 100 1640 Q 150 1720 100 1800"
+                fill="none"
+                stroke="url(#roadAsphalt)"
+                strokeWidth="50"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
-              {/* Animated dashed line */}
+              {/* Center dashed lane */}
+              <path
+                d="M 100 50 Q 150 120 100 200 Q 50 280 100 360 Q 150 440 100 520 Q 50 600 100 680 Q 150 760 100 840 Q 50 920 100 1000 Q 150 1080 100 1160 Q 50 1240 100 1320 Q 150 1400 100 1480 Q 50 1560 100 1640 Q 150 1720 100 1800"
+                fill="none"
+                stroke={currentRank.color}
+                strokeOpacity="0.5"
+                strokeWidth="3"
+                strokeDasharray="14,18"
+                strokeLinecap="round"
+              />
+              {/* Animated shimmer overlay */}
               <path
                 d="M 100 50 Q 150 120 100 200 Q 50 280 100 360 Q 150 440 100 520 Q 50 600 100 680 Q 150 760 100 840 Q 50 920 100 1000 Q 150 1080 100 1160 Q 50 1240 100 1320 Q 150 1400 100 1480 Q 50 1560 100 1640 Q 150 1720 100 1800"
                 fill="none"
                 stroke="url(#roadShimmer)"
-                strokeWidth="40"
-                strokeDasharray="100,100"
+                strokeWidth="50"
+                strokeDasharray="120,1880"
                 strokeDashoffset="100"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 style={{
-                  animation: "roadShimmer 4s linear infinite",
+                  animation: "roadShimmer 6s linear infinite",
+                  mixBlendMode: "overlay",
                 }}
               />
             </svg>
@@ -507,19 +559,19 @@ export function Progress() {
             {RANKS.map((rank, idx) => {
               const isCurrentRank = idx === currentRankIndex;
               const isUnlocked = idx <= currentRankIndex;
-              const yOffset = idx * 120;
               const isLeft = idx % 2 === 0;
 
               return (
                 <div
                   key={rank.id}
+                  ref={isCurrentRank ? currentNodeRef : undefined}
                   style={{
                     position: "relative",
-                    marginBottom: 100,
+                    marginBottom: 80,
                     display: "flex",
                     justifyContent: isLeft ? "flex-start" : "flex-end",
-                    paddingLeft: isLeft ? 0 : 100,
-                    paddingRight: isLeft ? 100 : 0,
+                    paddingLeft: isLeft ? 0 : 120,
+                    paddingRight: isLeft ? 120 : 0,
                     opacity: 1,
                   }}
                 >
@@ -527,13 +579,53 @@ export function Progress() {
                   <div
                     className={`rank-card rank-${rank.id} ${isCurrentRank ? "current" : ""} ${isUnlocked ? "unlocked" : "locked"}`}
                     style={{
-                      width: 180,
+                      width: 200,
                       textAlign: "center",
+                      position: "relative",
                       animation: isCurrentRank ? "nodeBob 3s ease-in-out infinite" : undefined,
                       filter: !isUnlocked ? "grayscale(100%) blur(2px)" : undefined,
                       opacity: !isUnlocked ? 0.5 : 1,
                     }}
                   >
+                    {/* Isometric ground platform */}
+                    <div
+                      style={{
+                        position: "absolute",
+                        left: "50%",
+                        bottom: -22,
+                        transform: "translateX(-50%) rotateX(70deg)",
+                        width: 170,
+                        height: 50,
+                        borderRadius: "50%",
+                        background: isUnlocked
+                          ? `radial-gradient(ellipse at center, ${rank.glowColor} 0%, transparent 70%)`
+                          : "radial-gradient(ellipse at center, rgba(148,163,184,0.25) 0%, transparent 70%)",
+                        filter: "blur(2px)",
+                        pointerEvents: "none",
+                        zIndex: 0,
+                      }}
+                    />
+
+                    {/* Pulsing aura ring on current */}
+                    {isCurrentRank && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          left: "50%",
+                          top: "50%",
+                          transform: "translate(-50%, -50%)",
+                          width: 230,
+                          height: 230,
+                          borderRadius: "50%",
+                          border: `2px solid ${rank.color}`,
+                          opacity: 0.35,
+                          animation: "auraPulse 2.4s ease-in-out infinite",
+                          pointerEvents: "none",
+                          zIndex: 0,
+                        }}
+                      />
+                    )}
+
                     {/* Lock Icon */}
                     {!isUnlocked && (
                       <div style={{ position: "absolute", top: 10, right: 10, fontSize: 20, opacity: 0.7, zIndex: 20 }}>
@@ -544,11 +636,13 @@ export function Progress() {
                     {/* Pixel art object */}
                     <div
                       style={{
-                        height: 60,
+                        height: 72,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         marginBottom: 12,
+                        transform: "scale(1.4)",
+                        filter: isUnlocked ? `drop-shadow(0 4px 6px ${rank.glowColor})` : undefined,
                         animation:
                           idx % 3 === 0
                             ? "dumbbell-rock 2s ease-in-out infinite"
@@ -672,6 +766,11 @@ export function Progress() {
         @keyframes nodeBob {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-8px); }
+        }
+
+        @keyframes auraPulse {
+          0%, 100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.15; }
+          50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.45; }
         }
 
         @keyframes dumbbell-rock {
