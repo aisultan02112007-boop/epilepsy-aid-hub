@@ -559,19 +559,19 @@ export function Progress() {
             {RANKS.map((rank, idx) => {
               const isCurrentRank = idx === currentRankIndex;
               const isUnlocked = idx <= currentRankIndex;
-              const yOffset = idx * 120;
               const isLeft = idx % 2 === 0;
 
               return (
                 <div
                   key={rank.id}
+                  ref={isCurrentRank ? currentNodeRef : undefined}
                   style={{
                     position: "relative",
-                    marginBottom: 100,
+                    marginBottom: 80,
                     display: "flex",
                     justifyContent: isLeft ? "flex-start" : "flex-end",
-                    paddingLeft: isLeft ? 0 : 100,
-                    paddingRight: isLeft ? 100 : 0,
+                    paddingLeft: isLeft ? 0 : 120,
+                    paddingRight: isLeft ? 120 : 0,
                     opacity: 1,
                   }}
                 >
@@ -579,13 +579,53 @@ export function Progress() {
                   <div
                     className={`rank-card rank-${rank.id} ${isCurrentRank ? "current" : ""} ${isUnlocked ? "unlocked" : "locked"}`}
                     style={{
-                      width: 180,
+                      width: 200,
                       textAlign: "center",
+                      position: "relative",
                       animation: isCurrentRank ? "nodeBob 3s ease-in-out infinite" : undefined,
                       filter: !isUnlocked ? "grayscale(100%) blur(2px)" : undefined,
                       opacity: !isUnlocked ? 0.5 : 1,
                     }}
                   >
+                    {/* Isometric ground platform */}
+                    <div
+                      style={{
+                        position: "absolute",
+                        left: "50%",
+                        bottom: -22,
+                        transform: "translateX(-50%) rotateX(70deg)",
+                        width: 170,
+                        height: 50,
+                        borderRadius: "50%",
+                        background: isUnlocked
+                          ? `radial-gradient(ellipse at center, ${rank.glowColor} 0%, transparent 70%)`
+                          : "radial-gradient(ellipse at center, rgba(148,163,184,0.25) 0%, transparent 70%)",
+                        filter: "blur(2px)",
+                        pointerEvents: "none",
+                        zIndex: 0,
+                      }}
+                    />
+
+                    {/* Pulsing aura ring on current */}
+                    {isCurrentRank && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          left: "50%",
+                          top: "50%",
+                          transform: "translate(-50%, -50%)",
+                          width: 230,
+                          height: 230,
+                          borderRadius: "50%",
+                          border: `2px solid ${rank.color}`,
+                          opacity: 0.35,
+                          animation: "auraPulse 2.4s ease-in-out infinite",
+                          pointerEvents: "none",
+                          zIndex: 0,
+                        }}
+                      />
+                    )}
+
                     {/* Lock Icon */}
                     {!isUnlocked && (
                       <div style={{ position: "absolute", top: 10, right: 10, fontSize: 20, opacity: 0.7, zIndex: 20 }}>
@@ -596,11 +636,13 @@ export function Progress() {
                     {/* Pixel art object */}
                     <div
                       style={{
-                        height: 60,
+                        height: 72,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         marginBottom: 12,
+                        transform: "scale(1.4)",
+                        filter: isUnlocked ? `drop-shadow(0 4px 6px ${rank.glowColor})` : undefined,
                         animation:
                           idx % 3 === 0
                             ? "dumbbell-rock 2s ease-in-out infinite"
