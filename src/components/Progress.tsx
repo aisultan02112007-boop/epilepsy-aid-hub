@@ -420,7 +420,11 @@ export function Progress() {
           height: "calc(100vh - 124px)",
           overflow: "auto",
           position: "relative",
-          perspective: "1000px",
+          perspective: "1400px",
+          perspectiveOrigin: "50% 0%",
+          scrollBehavior: "smooth",
+          background:
+            "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(167,243,208,0.35) 0%, transparent 60%), radial-gradient(ellipse 70% 50% at 50% 100%, rgba(196,181,253,0.3) 0%, transparent 60%), linear-gradient(180deg, #F0F7FF 0%, #F5ECFF 100%)",
         }}
       >
         {/* Background parallax effect */}
@@ -458,9 +462,18 @@ export function Progress() {
           ))}
         </div>
 
-        {/* Main Map Content */}
-        <div style={{ position: "relative", zIndex: 10, padding: "80px 40px 160px" }}>
-          <div style={{ maxWidth: 800, margin: "0 auto" }}>
+        {/* Main Map Content — isometric tilt */}
+        <div
+          style={{
+            position: "relative",
+            zIndex: 10,
+            padding: "80px 40px 200px",
+            transform: "rotateX(8deg)",
+            transformOrigin: "50% 0%",
+            transformStyle: "preserve-3d",
+          }}
+        >
+          <div style={{ maxWidth: 720, margin: "0 auto", position: "relative" }}>
             {/* Animated SVG Road */}
             <svg
               style={{
