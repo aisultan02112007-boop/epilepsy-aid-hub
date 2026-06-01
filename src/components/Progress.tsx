@@ -1,33 +1,25 @@
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 
-type Log = {
-  date: string;
-  weight: number;
-  waist: number;
-  steps: number;
-  water: number;
-  calories: number;
-  workout: boolean;
-  mood: number;
-};
-
-const KEY = "fit_logs";
 const PROFILE_KEY = "fit_profile";
 
-function read(): Log[] {
+type ProfileMetrics = { weight: number; height: number };
+
+function readProfile(): ProfileMetrics {
   try {
-    return JSON.parse(localStorage.getItem(KEY) || "[]");
+    const p = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
+    return { weight: Number(p.weight) || 70, height: Number(p.height) || 175 };
   } catch {
-    return [];
+    return { weight: 70, height: 175 };
   }
 }
 
-function write(l: Log[]) {
-  localStorage.setItem(KEY, JSON.stringify(l));
-}
-
-function today() {
-  return new Date().toISOString().slice(0, 10);
+function writeProfile(p: ProfileMetrics) {
+  try {
+    const prev = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
+    localStorage.setItem(PROFILE_KEY, JSON.stringify({ ...prev, ...p }));
+  } catch {
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(p));
+  }
 }
 
 interface RankData {
