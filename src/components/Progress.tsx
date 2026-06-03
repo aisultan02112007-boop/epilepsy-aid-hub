@@ -1,25 +1,19 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 
-const PROFILE_KEY = "fit_profile";
+type Log = { date: string; weight: number; water: number; workout: boolean };
+type QuizEntry = { date: string; score: number; total: number };
 
-type ProfileMetrics = { weight: number; height: number };
-
-function readProfile(): ProfileMetrics {
-  try {
-    const p = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
-    return { weight: Number(p.weight) || 70, height: Number(p.height) || 175 };
-  } catch {
-    return { weight: 70, height: 175 };
-  }
+function readLogs(): Log[] {
+  try { return JSON.parse(localStorage.getItem("fit_logs") || "[]"); } catch { return []; }
 }
-
-function writeProfile(p: ProfileMetrics) {
-  try {
-    const prev = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
-    localStorage.setItem(PROFILE_KEY, JSON.stringify({ ...prev, ...p }));
-  } catch {
-    localStorage.setItem(PROFILE_KEY, JSON.stringify(p));
-  }
+function readQuiz(): QuizEntry[] {
+  try { return JSON.parse(localStorage.getItem("fit_quiz_history") || "[]"); } catch { return []; }
+}
+function calcStreak(logs: Log[]) {
+  const set = new Set(logs.map((l) => l.date));
+  let s = 0; const d = new Date();
+  while (set.has(d.toISOString().slice(0, 10))) { s++; d.setDate(d.getDate() - 1); }
+  return s;
 }
 
 interface RankData {
