@@ -200,16 +200,26 @@ function PixelTrophy() {
 }
 
 export function Progress() {
-  const [userXP, setUserXP] = useState(450);
-  const [currentRankIndex, setCurrentRankIndex] = useState(3);
+  const [logs, setLogs] = useState<Log[]>([]);
+  const [quiz, setQuiz] = useState<QuizEntry[]>([]);
   const [scrollY, setScrollY] = useState(0);
-  const [metrics, setMetrics] = useState<ProfileMetrics>({ weight: 70, height: 175 });
-  const [editing, setEditing] = useState<null | "weight" | "height">(null);
   const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setMetrics(readProfile());
+    setLogs(readLogs());
+    setQuiz(readQuiz());
   }, []);
+
+  const workouts = logs.filter((l) => l.workout).length;
+  const streak = useMemo(() => calcStreak(logs), [logs]);
+  const quizPasses = quiz.filter((q) => q.score >= 700).length;
+  const userXP = workouts * 50 + quizPasses * 100 + streak * 25;
+
+  const currentRankIndex = useMemo(() => {
+    let i = 0;
+    for (let k = 0; k < RANKS.length; k++) if (userXP >= RANKS[k].minXP) i = k;
+    return i;
+  }, [userXP]);
 
   // Smooth scroll to current rank on mount
   const currentNodeRef = useRef<HTMLDivElement>(null);
@@ -218,19 +228,7 @@ export function Progress() {
       currentNodeRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 300);
     return () => clearTimeout(t);
-  }, []);
-
-  const bmi = metrics.height > 0 ? metrics.weight / Math.pow(metrics.height / 100, 2) : 0;
-  const bmiLabel =
-    bmi < 18.5 ? "Низкий" : bmi < 25 ? "Норма" : bmi < 30 ? "Избыток" : "Высокий";
-  const bmiColor =
-    bmi < 18.5 ? "#60A5FA" : bmi < 25 ? "#10B981" : bmi < 30 ? "#F59E0B" : "#EF4444";
-
-  const updateMetric = (k: "weight" | "height", v: number) => {
-    const next = { ...metrics, [k]: v };
-    setMetrics(next);
-    writeProfile(next);
-  };
+  }, [currentRankIndex]);
 
   useEffect(() => {
     const handleScroll = () => {
