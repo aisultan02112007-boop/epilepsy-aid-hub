@@ -301,17 +301,17 @@ export function Progress() {
         </div>
       </div>
 
-      {/* ============ COMPACT DASHBOARD HEADER (weight / height / BMI) ============ */}
+      {/* ============ COMPACT STATS STRIP (linked to XP) ============ */}
       <div
         style={{
           position: "fixed",
           top: 60,
           left: 0,
           right: 0,
-          height: 64,
+          height: 56,
           zIndex: 999,
-          padding: "10px 24px",
-          background: "rgba(255,255,255,0.85)",
+          padding: "8px 24px",
+          background: "rgba(255,255,255,0.82)",
           backdropFilter: "blur(14px)",
           borderBottom: "1px solid rgba(148,163,184,0.18)",
         }}
@@ -322,85 +322,40 @@ export function Progress() {
             margin: "0 auto",
             height: "100%",
             display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr",
+            gridTemplateColumns: "repeat(4, 1fr)",
             gap: 10,
           }}
         >
           {[
-            { key: "weight" as const, label: "Вес", value: metrics.weight, unit: "кг", icon: "⚖️", accent: "#2563EB" },
-            { key: "height" as const, label: "Рост", value: metrics.height, unit: "см", icon: "📏", accent: "#7C3AED" },
-          ].map((m) => (
+            { label: "Тренировки", value: workouts, unit: "×50", icon: "💪", accent: "#2563EB" },
+            { label: "Квизы", value: quizPasses, unit: "×100", icon: "🧠", accent: "#7C3AED" },
+            { label: "Серия", value: streak, unit: "×25", icon: "🔥", accent: "#F59E0B" },
+            { label: "Ранг", value: currentRank.name, unit: "", icon: currentRank.character, accent: currentRank.color },
+          ].map((m, i) => (
             <div
-              key={m.key}
-              onClick={() => setEditing(m.key)}
+              key={i}
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: 10,
-                padding: "0 14px",
+                padding: "0 12px",
                 borderRadius: 12,
                 background: "rgba(255,255,255,0.7)",
-                border: "1px solid rgba(148,163,184,0.2)",
-                cursor: "pointer",
-                transition: "all 0.2s",
+                border: `1px solid ${m.accent}30`,
               }}
             >
               <div style={{ fontSize: 18 }}>{m.icon}</div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 10, fontWeight: 600, color: "#64748B", textTransform: "uppercase", letterSpacing: 0.4 }}>
+                <div style={{ fontSize: 9, fontWeight: 600, color: "#64748B", textTransform: "uppercase", letterSpacing: 0.4 }}>
                   {m.label}
                 </div>
-                {editing === m.key ? (
-                  <input
-                    autoFocus
-                    type="number"
-                    value={m.value}
-                    onChange={(e) => updateMetric(m.key, Number(e.target.value))}
-                    onBlur={() => setEditing(null)}
-                    onKeyDown={(e) => e.key === "Enter" && setEditing(null)}
-                    style={{
-                      width: "100%",
-                      fontSize: 16,
-                      fontWeight: 800,
-                      color: m.accent,
-                      border: "none",
-                      outline: "none",
-                      background: "transparent",
-                      padding: 0,
-                    }}
-                  />
-                ) : (
-                  <div style={{ fontSize: 16, fontWeight: 800, color: m.accent, lineHeight: 1.1 }}>
-                    {m.value}
-                    <span style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", marginLeft: 4 }}>{m.unit}</span>
-                  </div>
-                )}
+                <div style={{ fontSize: 14, fontWeight: 800, color: m.accent, lineHeight: 1.1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {m.value}
+                  {m.unit && <span style={{ fontSize: 10, fontWeight: 600, color: "#94A3B8", marginLeft: 4 }}>{m.unit} XP</span>}
+                </div>
               </div>
             </div>
           ))}
-
-          {/* BMI */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "0 14px",
-              borderRadius: 12,
-              background: `linear-gradient(135deg, ${bmiColor}14, ${bmiColor}06)`,
-              border: `1px solid ${bmiColor}40`,
-            }}
-          >
-            <div style={{ fontSize: 18 }}>🔥</div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 10, fontWeight: 600, color: "#64748B", textTransform: "uppercase", letterSpacing: 0.4 }}>
-                ИМТ · {bmiLabel}
-              </div>
-              <div style={{ fontSize: 16, fontWeight: 800, color: bmiColor, lineHeight: 1.1 }}>
-                {bmi.toFixed(1)}
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -408,8 +363,8 @@ export function Progress() {
       <div
         ref={mapRef}
         style={{
-          marginTop: 124,
-          height: "calc(100vh - 124px)",
+          marginTop: 116,
+          height: "calc(100vh - 116px)",
           overflow: "auto",
           position: "relative",
           perspective: "1400px",
@@ -423,7 +378,7 @@ export function Progress() {
         <div
           style={{
             position: "fixed",
-            top: 124,
+            top: 116,
             left: 0,
             right: 0,
             bottom: 0,
