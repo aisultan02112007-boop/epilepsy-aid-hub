@@ -38,20 +38,18 @@ function PixelTrophy() {
 }
 
 export function Progress() {
-  const [logs, setLogs] = useState<Log[]>([]);
-  const [quiz, setQuiz] = useState<QuizEntry[]>([]);
+  const [stats, setStats] = useState(() => computeXP());
   const [scrollY, setScrollY] = useState(0);
   const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setLogs(readLogs());
-    setQuiz(readQuiz());
+    setStats(computeXP());
+    const onFocus = () => setStats(computeXP());
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
   }, []);
 
-  const workouts = logs.filter((l) => l.workout).length;
-  const streak = useMemo(() => calcStreak(logs), [logs]);
-  const quizPasses = quiz.filter((q) => q.score >= 700).length;
-  const userXP = workouts * 50 + quizPasses * 100 + streak * 25;
+  const { workouts, quizPasses, streak, totalXP: userXP } = stats;
 
   const currentRankIndex = useMemo(() => {
     let i = 0;
