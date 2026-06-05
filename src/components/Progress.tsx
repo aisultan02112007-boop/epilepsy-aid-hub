@@ -1,34 +1,5 @@
 import { useEffect, useMemo, useState, useRef } from "react";
-
-type Log = { date: string; weight: number; water: number; workout: boolean };
-type QuizEntry = { date: string; score: number; total: number };
-
-function readLogs(): Log[] {
-  try { return JSON.parse(localStorage.getItem("fit_logs") || "[]"); } catch { return []; }
-}
-function readQuiz(): QuizEntry[] {
-  try { return JSON.parse(localStorage.getItem("fit_quiz_history") || "[]"); } catch { return []; }
-}
-function calcStreak(logs: Log[]) {
-  const set = new Set(logs.map((l) => l.date));
-  let s = 0; const d = new Date();
-  while (set.has(d.toISOString().slice(0, 10))) { s++; d.setDate(d.getDate() - 1); }
-  return s;
-}
-
-interface RankData {
-  id: number;
-  name: string;
-  character: string;
-  color: string;
-  glowColor: string;
-  description: string;
-  minXP: number;
-  animation: string;
-  quote: string;
-}
-
-const RANKS: RankData[] = [
+import { RANKS, computeXP } from "@/lib/progression";
   {
     id: 1,
     name: "Beginner",
