@@ -1,19 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Loader2, RefreshCw, CheckCircle2, XCircle, Lightbulb, Trophy, Medal, MapPin, Gamepad2,
-  Flame, Zap, Star, Target, Activity, Brain, Timer, Award, ChevronRight, Sparkles, Lock,
+  Flame, Zap, Star, Target, Activity, Brain, Award, ChevronRight, Sparkles, Lock,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { getWeeklyLeaderboard } from "@/lib/leaderboard";
+import { computeXP as computeProgression, getRank } from "@/lib/progression";
 
 // ============== STORAGE ==============
 const HISTORY_KEY = "fit_quiz_history";
-const LOGS_KEY = "fit_logs";
 const BONUS_KEY = "fit_xp_bonus";
 const DAILY_KEY = "fit_daily_challenge";
 const MINIGAME_KEY = "fit_minigame_history";
 
-type Log = { date: string };
 type QuizEntry = { date: string; score: number; total: number };
 type MinigameEntry = { date: string; game: string; score: number; xp: number };
 type DailyState = { date: string; idx: number; completed: boolean };
@@ -35,55 +34,14 @@ function addXPBonus(amount: number) {
   localStorage.setItem(BONUS_KEY, String(cur + amount));
 }
 
-// ============== XP / LEVEL ==============
-function computeXP() {
-  const workouts = readJSON<Log[]>(LOGS_KEY, []).length;
-  const quizzes = readJSON<QuizEntry[]>(HISTORY_KEY, []);
-  const quizPasses = quizzes.filter((q) => q.score >= 700).length;
-  const minigames = readJSON<MinigameEntry[]>(MINIGAME_KEY, []);
-  const minigameXP = minigames.reduce((s, m) => s + m.xp, 0);
-  const bonus = Number(localStorage.getItem(BONUS_KEY) || "0");
-  // streak
-  const days = Array.from(new Set(readJSON<Log[]>(LOGS_KEY, []).map((l) => l.date.slice(0, 10)))).sort().reverse();
-  let streak = 0;
-  const cur = new Date();
-  for (const d of days) {
-    const dd = new Date(d);
-    if (Math.round((cur.getTime() - dd.getTime()) / 86400000) === streak) streak++;
-    else break;
-  }
-  return {
-    workouts,
-    quizPasses,
-    streak,
-    minigamesPlayed: minigames.length,
-    totalXP: workouts * 50 + quizPasses * 100 + streak * 25 + minigameXP + bonus,
-  };
-}
-
-const LEVELS = [
-  { lvl: 1, name: "Новичок", min: 0, color: "#94A3B8", glow: "#CBD5E1" },
-  { lvl: 2, name: "Боец", min: 250, color: "#10B981", glow: "#34D399" },
-  { lvl: 3, name: "Атлет", min: 600, color: "#06B6D4", glow: "#22D3EE" },
-  { lvl: 4, name: "Воин", min: 1200, color: "#2563EB", glow: "#3B82F6" },
-  { lvl: 5, name: "Чемпион", min: 2000, color: "#7C3AED", glow: "#A78BFA" },
-  { lvl: 6, name: "Легенда", min: 3500, color: "#F59E0B", glow: "#FBBF24" },
-  { lvl: 7, name: "Мифический", min: 6000, color: "#EF4444", glow: "#F87171" },
-];
-
-function getLevel(xp: number) {
-  let cur = LEVELS[0];
-  for (const l of LEVELS) if (xp >= l.min) cur = l;
-  const next = LEVELS[Math.min(LEVELS.indexOf(cur) + 1, LEVELS.length - 1)];
-  const pct = next.min === cur.min ? 100 : Math.round(((xp - cur.min) / (next.min - cur.min)) * 100);
-  return { cur, next, pct: Math.max(0, Math.min(100, pct)) };
-}
+// XP + ranks come from shared progression module so the Games arena and the
+// Progress map share one unified rank system.
+const computeXP = computeProgression;
 
 // ============== DAILY CHALLENGES ==============
 const DAILIES = [
   { icon: Brain, title: "Пройди фитнес-квиз", desc: "Набери минимум 700 очков", xp: 150, type: "quiz" as const },
   { icon: Zap, title: "Реакция воина", desc: "Сыграй в Reflex Trainer", xp: 100, type: "reflex" as const },
-  { icon: Timer, title: "Контроль темпа", desc: "Удержи планку 30 сек в Tempo Hold", xp: 100, type: "tempo" as const },
   { icon: Activity, title: "Активность дня", desc: "Запиши тренировку в дневник", xp: 120, type: "workout" as const },
   { icon: Target, title: "Точный удар", desc: "Сыграй в Macro Match без ошибок", xp: 130, type: "macro" as const },
 ];
@@ -123,7 +81,7 @@ function getAwards(s: ReturnType<typeof computeXP>) {
 }
 
 // ============== MAIN ==============
-type Tab = "hub" | "quiz" | "reflex" | "tempo" | "macro";
+type Tab = "hub" | "quiz" | "reflex" | "macro";
 
 export function Games() {
   const [tab, setTab] = useState<Tab>("hub");
@@ -139,7 +97,6 @@ export function Games() {
       {tab === "hub" && <Hub stats={stats} setTab={setTab} onRefresh={refresh} />}
       {tab === "quiz" && <QuizGame onComplete={refresh} onBack={() => setTab("hub")} />}
       {tab === "reflex" && <ReflexGame onComplete={refresh} onBack={() => setTab("hub")} />}
-      {tab === "tempo" && <TempoGame onComplete={refresh} onBack={() => setTab("hub")} />}
       {tab === "macro" && <MacroGame onComplete={refresh} onBack={() => setTab("hub")} />}
     </div>
   );
@@ -164,7 +121,6 @@ function TabBar({ tab, setTab }: { tab: Tab; setTab: (t: Tab) => void }) {
     { key: "hub", label: "Обзор", icon: Trophy },
     { key: "quiz", label: "Квиз", icon: Brain },
     { key: "reflex", label: "Reflex", icon: Zap },
-    { key: "tempo", label: "Tempo", icon: Timer },
     { key: "macro", label: "Macro", icon: Target },
   ];
   return (
@@ -191,7 +147,7 @@ function TabBar({ tab, setTab }: { tab: Tab; setTab: (t: Tab) => void }) {
 // ============== HUB ==============
 function Hub({ stats, setTab, onRefresh }: { stats: ReturnType<typeof computeXP>; setTab: (t: Tab) => void; onRefresh: () => void }) {
   const { user } = useAuth();
-  const { cur, next, pct } = getLevel(stats.totalXP);
+  const { cur, next, pct } = getRank(stats.totalXP);
   const { state: daily, def: dailyDef } = getDailyChallenge();
   const awards = getAwards(stats);
   const leaderboard = useMemo(() => getWeeklyLeaderboard(user?.name || "Вы", stats.totalXP), [user?.name, stats.totalXP]);
@@ -200,16 +156,16 @@ function Hub({ stats, setTab, onRefresh }: { stats: ReturnType<typeof computeXP>
     <div className="animate-fade-up flex flex-col gap-6">
       {/* LEVEL CARD */}
       <div className="glass-strong relative overflow-hidden" style={{ padding: 28 }}>
-        <div style={{ position: "absolute", inset: 0, background: `radial-gradient(600px circle at 90% 0%, ${cur.glow}33, transparent 60%)`, pointerEvents: "none" }} />
+        <div style={{ position: "absolute", inset: 0, background: `radial-gradient(600px circle at 90% 0%, ${cur.glowColor}, transparent 60%)`, pointerEvents: "none" }} />
         <div className="relative flex items-start justify-between flex-wrap gap-4">
           <div className="flex items-center gap-4">
-            <div className="soft-float flex items-center justify-center" style={{ width: 72, height: 72, borderRadius: 20, background: `linear-gradient(135deg, ${cur.color}, ${cur.glow})`, boxShadow: `0 12px 30px ${cur.color}55` }}>
-              <Trophy size={32} color="#fff" />
+            <div className="soft-float flex items-center justify-center" style={{ width: 72, height: 72, borderRadius: 20, background: `linear-gradient(135deg, ${cur.color}, ${cur.color}AA)`, boxShadow: `0 12px 30px ${cur.color}55`, fontSize: 36 }}>
+              <span>{cur.character}</span>
             </div>
             <div>
-              <span className="inline-block" style={{ background: `${cur.color}22`, color: cur.color, fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 999, letterSpacing: "0.05em", textTransform: "uppercase" }}>Уровень {cur.lvl}</span>
+              <span className="inline-block" style={{ background: `${cur.color}22`, color: cur.color, fontSize: 11, fontWeight: 800, padding: "4px 10px", borderRadius: 999, letterSpacing: "0.05em", textTransform: "uppercase" }}>Ранг {cur.id}</span>
               <h2 style={{ fontSize: 28, fontWeight: 900, color: "#0F172A", letterSpacing: "-0.02em", marginTop: 4 }}>{cur.name}</h2>
-              <p className="text-soft" style={{ fontSize: 13, marginTop: 2 }}>{stats.totalXP} XP • до «{next.name}» {Math.max(0, next.min - stats.totalXP)} XP</p>
+              <p className="text-soft" style={{ fontSize: 13, marginTop: 2 }}>{stats.totalXP} XP {next ? `• до «${next.name}» ${Math.max(0, next.minXP - stats.totalXP)} XP` : "• максимальный ранг"}</p>
             </div>
           </div>
           <div style={{ textAlign: "right" }}>
@@ -218,7 +174,7 @@ function Hub({ stats, setTab, onRefresh }: { stats: ReturnType<typeof computeXP>
           </div>
         </div>
         <div className="relative mt-5" style={{ height: 10, borderRadius: 999, background: "rgba(148,163,184,0.22)", overflow: "hidden" }}>
-          <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg, ${cur.color}, ${cur.glow})`, boxShadow: `0 0 14px ${cur.glow}88`, transition: "width 0.5s ease" }} />
+          <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(90deg, ${cur.color}, ${next?.color || cur.color})`, boxShadow: `0 0 14px ${cur.color}88`, transition: "width 0.5s ease" }} />
         </div>
         <div className="relative grid grid-cols-2 md:grid-cols-4 gap-3 mt-5">
           {[
@@ -266,7 +222,7 @@ function Hub({ stats, setTab, onRefresh }: { stats: ReturnType<typeof computeXP>
                 <CheckCircle2 size={14} /> Выполнено
               </span>
             ) : (
-              <button onClick={() => setTab(dailyDef.type === "quiz" ? "quiz" : dailyDef.type === "reflex" ? "reflex" : dailyDef.type === "tempo" ? "tempo" : dailyDef.type === "macro" ? "macro" : "hub")} className="btn-primary" style={{ padding: "8px 14px", fontSize: 13 }}>
+              <button onClick={() => setTab(dailyDef.type === "quiz" ? "quiz" : dailyDef.type === "reflex" ? "reflex" : dailyDef.type === "macro" ? "macro" : "hub")} className="btn-primary" style={{ padding: "8px 14px", fontSize: 13 }}>
                 Начать <ChevronRight size={14} />
               </button>
             )}
@@ -302,7 +258,6 @@ function Hub({ stats, setTab, onRefresh }: { stats: ReturnType<typeof computeXP>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           <GameCard tab="quiz" icon={Brain} title="Fitness Quiz" desc="Проверь знания о теле и питании" xp="до 1000 XP" gradient="linear-gradient(135deg, #2563EB, #7C3AED)" onClick={setTab} />
           <GameCard tab="reflex" icon={Zap} title="Reflex Trainer" desc="Тренируй скорость реакции" xp="до 150 XP" gradient="linear-gradient(135deg, #06B6D4, #2563EB)" onClick={setTab} />
-          <GameCard tab="tempo" icon={Timer} title="Tempo Hold" desc="Удержи ритм как в изометрике" xp="до 120 XP" gradient="linear-gradient(135deg, #10B981, #06B6D4)" onClick={setTab} />
           <GameCard tab="macro" icon={Target} title="Macro Match" desc="Сортируй продукты по макронутриентам" xp="до 130 XP" gradient="linear-gradient(135deg, #F59E0B, #EF4444)" onClick={setTab} />
         </div>
       </div>
