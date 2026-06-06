@@ -411,7 +411,7 @@ export function Progress({ onNavigate }: ProgressProps = {}) {
                       </div>
                     )}
 
-                    {/* Pixel art object */}
+                    {/* RPG icon */}
                     <div
                       style={{
                         height: 72,
@@ -419,19 +419,11 @@ export function Progress({ onNavigate }: ProgressProps = {}) {
                         alignItems: "center",
                         justifyContent: "center",
                         marginBottom: 12,
-                        transform: "scale(1.4)",
-                        filter: isUnlocked ? `drop-shadow(0 4px 6px ${rank.glowColor})` : undefined,
-                        animation:
-                          idx % 3 === 0
-                            ? "dumbbell-rock 2s ease-in-out infinite"
-                            : idx % 3 === 1
-                            ? "kettlebell-bounce 2s ease-in-out infinite"
-                            : "trophy-shimmer 3s ease-in-out infinite",
+                        filter: isUnlocked ? `drop-shadow(0 6px 10px ${rank.glowColor})` : undefined,
+                        animation: isCurrentRank ? "iconBob 2.4s ease-in-out infinite" : undefined,
                       }}
                     >
-                      {idx % 3 === 0 && <PixelDumbbell />}
-                      {idx % 3 === 1 && <PixelKettlebell />}
-                      {idx % 3 === 2 && <PixelTrophy />}
+                      <RankIcon idx={idx} color={rank.color} accent={rank.color} />
                     </div>
 
                     {/* Rank Card */}
