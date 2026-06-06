@@ -233,63 +233,22 @@ export function Progress({ onNavigate }: ProgressProps = {}) {
 
       {/* ============ FULLSCREEN PROGRESSION MAP ============ */}
       <div
-        ref={mapRef}
         style={{
           marginTop: 116,
           height: "calc(100vh - 116px)",
           overflow: "auto",
           position: "relative",
-          perspective: "1400px",
-          perspectiveOrigin: "50% 0%",
           scrollBehavior: "smooth",
           background:
             "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(167,243,208,0.35) 0%, transparent 60%), radial-gradient(ellipse 70% 50% at 50% 100%, rgba(196,181,253,0.3) 0%, transparent 60%), linear-gradient(180deg, #F0F7FF 0%, #F5ECFF 100%)",
         }}
       >
-        {/* Background parallax effect */}
-        <div
-          style={{
-            position: "fixed",
-            top: 116,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "radial-gradient(circle at 50% 40%, rgba(37, 99, 235, 0.05) 0%, transparent 60%)",
-            pointerEvents: "none",
-            transform: `translateY(${scrollY * 0.5}px)`,
-            zIndex: 0,
-          }}
-        />
-
-        {/* Floating particles */}
-        <div style={{ position: "fixed", top: 60, left: 0, right: 0, bottom: 0, pointerEvents: "none", zIndex: 1 }}>
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div
-              key={i}
-              style={{
-                position: "absolute",
-                left: `${Math.random() * 100}%`,
-                top: `${60 + Math.random() * window.innerHeight}px`,
-                width: 4,
-                height: 4,
-                borderRadius: "50%",
-                background: `rgba(37, 99, 235, ${0.1 + Math.random() * 0.2})`,
-                animation: `float ${6 + Math.random() * 4}s ease-in-out infinite`,
-                animationDelay: `${i * 0.5}s`,
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Main Map Content — isometric tilt */}
+        {/* Main Map Content */}
         <div
           style={{
             position: "relative",
             zIndex: 10,
             padding: "80px 40px 200px",
-            transform: "rotateX(8deg)",
-            transformOrigin: "50% 0%",
-            transformStyle: "preserve-3d",
           }}
         >
           <div style={{ maxWidth: 720, margin: "0 auto", position: "relative" }}>
