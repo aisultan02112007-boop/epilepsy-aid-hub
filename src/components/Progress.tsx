@@ -505,21 +505,21 @@ export function Progress({ onNavigate }: ProgressProps = {}) {
                       {/* Continue button for current rank */}
                       {isCurrentRank && (
                         <button
+                          onClick={() => onNavigate?.("games")}
                           style={{
                             width: "100%",
-                            padding: "8px 12px",
-                            borderRadius: 8,
+                            padding: "10px 12px",
+                            borderRadius: 10,
                             background: `linear-gradient(135deg, ${rank.color}, ${rank.glowColor})`,
                             border: "none",
                             color: "#fff",
-                            fontWeight: 700,
-                            fontSize: 12,
+                            fontWeight: 800,
+                            fontSize: 13,
                             cursor: "pointer",
-                            boxShadow: `0 0 12px ${rank.glowColor}`,
-                            animation: "shimmerSweep 3s ease-in-out infinite",
+                            boxShadow: `0 6px 18px ${rank.glowColor}`,
                           }}
                         >
-                          Continue →
+                          Продолжить →
                         </button>
                       )}
                     </div>
