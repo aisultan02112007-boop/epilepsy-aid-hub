@@ -538,6 +538,11 @@ export function Progress({ onNavigate }: ProgressProps = {}) {
           50% { transform: translateY(-8px); }
         }
 
+        @keyframes iconBob {
+          0%, 100% { transform: translateY(0) scale(1); }
+          50% { transform: translateY(-6px) scale(1.05); }
+        }
+
         @keyframes auraPulse {
           0%, 100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.15; }
           50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.45; }
@@ -568,12 +573,6 @@ export function Progress({ onNavigate }: ProgressProps = {}) {
           100% { stroke-dashoffset: -1900; }
         }
 
-        @keyframes float {
-          0% { transform: translateY(0) translateX(0); opacity: 0; }
-          50% { opacity: 1; }
-          100% { transform: translateY(-200px) translateX(20px); opacity: 0; }
-        }
-
         @keyframes shimmerSweep {
           0%, 100% { background-position: -200% 0; }
           50% { background-position: 200% 0; }
@@ -602,10 +601,6 @@ export function Progress({ onNavigate }: ProgressProps = {}) {
           transform: translateY(-8px);
         }
 
-        svg {
-          image-rendering: pixelated;
-          image-rendering: crisp-edges;
-        }
       `}</style>
     </div>
   );
