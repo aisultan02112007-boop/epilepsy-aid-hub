@@ -1,46 +1,95 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { RANKS, computeXP } from "@/lib/progression";
+import type { ViewKey } from "./Navbar";
 
-// Pixel art fitness objects
-function PixelDumbbell() {
+// ===== Crisp RPG-style SVG icons (anti-aliased, no pixelation) =====
+function RPGDumbbell({ color = "#475569", accent = "#0F172A" }: { color?: string; accent?: string }) {
   return (
-    <svg width="40" height="40" viewBox="0 0 40 40" style={{ imageRendering: "pixelated" }}>
-      <rect x="6" y="14" width="4" height="12" fill="#C0A080" />
-      <rect x="10" y="10" width="4" height="20" fill="#8B7355" />
-      <rect x="14" y="8" width="12" height="24" fill="#654321" />
-      <rect x="26" y="10" width="4" height="20" fill="#8B7355" />
-      <rect x="30" y="14" width="4" height="12" fill="#C0A080" />
+    <svg width="56" height="56" viewBox="0 0 64 64" fill="none" aria-hidden>
+      <defs>
+        <linearGradient id="dbMetal" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#F1F5F9" />
+          <stop offset="50%" stopColor={color} />
+          <stop offset="100%" stopColor={accent} />
+        </linearGradient>
+      </defs>
+      <rect x="4" y="22" width="6" height="20" rx="2" fill="url(#dbMetal)" />
+      <rect x="10" y="16" width="8" height="32" rx="3" fill="url(#dbMetal)" />
+      <rect x="18" y="28" width="28" height="8" rx="2" fill="url(#dbMetal)" />
+      <rect x="46" y="16" width="8" height="32" rx="3" fill="url(#dbMetal)" />
+      <rect x="54" y="22" width="6" height="20" rx="2" fill="url(#dbMetal)" />
+      <rect x="18" y="30" width="28" height="2" fill="rgba(255,255,255,0.5)" />
+    </svg>
+  );
+}
+function RPGKettlebell({ color = "#1E293B", accent = "#0F172A" }: { color?: string; accent?: string }) {
+  return (
+    <svg width="56" height="56" viewBox="0 0 64 64" fill="none" aria-hidden>
+      <defs>
+        <radialGradient id="kbBody" cx="35%" cy="35%" r="70%">
+          <stop offset="0%" stopColor="#64748B" />
+          <stop offset="60%" stopColor={color} />
+          <stop offset="100%" stopColor={accent} />
+        </radialGradient>
+      </defs>
+      <path d="M22 14 Q22 8 32 8 Q42 8 42 14 L42 22 L22 22 Z" fill="none" stroke="#334155" strokeWidth="4" strokeLinejoin="round" />
+      <circle cx="32" cy="40" r="18" fill="url(#kbBody)" />
+      <ellipse cx="26" cy="34" rx="4" ry="2" fill="rgba(255,255,255,0.35)" />
+    </svg>
+  );
+}
+function RPGBarbell({ color = "#334155" }: { color?: string }) {
+  return (
+    <svg width="60" height="56" viewBox="0 0 72 64" fill="none" aria-hidden>
+      <defs>
+        <linearGradient id="bbBar" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#E2E8F0" />
+          <stop offset="50%" stopColor="#CBD5E1" />
+          <stop offset="100%" stopColor="#94A3B8" />
+        </linearGradient>
+      </defs>
+      <rect x="2" y="28" width="68" height="6" rx="2" fill="url(#bbBar)" />
+      <rect x="8" y="18" width="8" height="26" rx="2" fill={color} />
+      <rect x="16" y="22" width="4" height="18" rx="1" fill={color} />
+      <rect x="52" y="22" width="4" height="18" rx="1" fill={color} />
+      <rect x="56" y="18" width="8" height="26" rx="2" fill={color} />
+    </svg>
+  );
+}
+function RPGTrophy({ color = "#FFB000", accent = "#FF6F00" }: { color?: string; accent?: string }) {
+  return (
+    <svg width="56" height="56" viewBox="0 0 64 64" fill="none" aria-hidden>
+      <defs>
+        <linearGradient id="trGold" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#FFEB99" />
+          <stop offset="60%" stopColor={color} />
+          <stop offset="100%" stopColor={accent} />
+        </linearGradient>
+      </defs>
+      <path d="M18 10 H46 V24 Q46 36 32 36 Q18 36 18 24 Z" fill="url(#trGold)" stroke="#B45309" strokeWidth="1.5" />
+      <path d="M18 14 Q8 14 8 22 Q8 28 18 30" fill="none" stroke="url(#trGold)" strokeWidth="4" strokeLinecap="round" />
+      <path d="M46 14 Q56 14 56 22 Q56 28 46 30" fill="none" stroke="url(#trGold)" strokeWidth="4" strokeLinecap="round" />
+      <rect x="26" y="36" width="12" height="8" fill="url(#trGold)" />
+      <rect x="20" y="44" width="24" height="6" rx="2" fill="url(#trGold)" stroke="#B45309" strokeWidth="1" />
+      <path d="M26 16 Q30 22 32 20" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round" fill="none" />
     </svg>
   );
 }
 
-function PixelKettlebell() {
-  return (
-    <svg width="40" height="40" viewBox="0 0 40 40" style={{ imageRendering: "pixelated" }}>
-      <circle cx="20" cy="24" r="8" fill="#2F2F2F" />
-      <rect x="18" y="6" width="4" height="16" fill="#654321" />
-      <rect x="14" y="8" width="4" height="4" fill="#8B7355" />
-      <rect x="22" y="8" width="4" height="4" fill="#8B7355" />
-    </svg>
-  );
+function RankIcon({ idx, color, accent }: { idx: number; color: string; accent: string }) {
+  const mod = idx % 4;
+  if (mod === 0) return <RPGDumbbell color={color} accent={accent} />;
+  if (mod === 1) return <RPGKettlebell color={color} accent={accent} />;
+  if (mod === 2) return <RPGBarbell color={color} />;
+  return <RPGTrophy color={color} accent={accent} />;
 }
 
-function PixelTrophy() {
-  return (
-    <svg width="40" height="40" viewBox="0 0 40 40" style={{ imageRendering: "pixelated" }}>
-      <rect x="8" y="22" width="24" height="4" fill="#FFD700" />
-      <rect x="6" y="6" width="8" height="16" fill="#FFD700" />
-      <rect x="26" y="6" width="8" height="16" fill="#FFD700" />
-      <rect x="14" y="8" width="12" height="14" fill="#FFA500" />
-      <rect x="16" y="4" width="8" height="4" fill="#FFD700" />
-    </svg>
-  );
+interface ProgressProps {
+  onNavigate?: (view: ViewKey) => void;
 }
 
-export function Progress() {
+export function Progress({ onNavigate }: ProgressProps = {}) {
   const [stats, setStats] = useState(() => computeXP());
-  const [scrollY, setScrollY] = useState(0);
-  const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setStats(computeXP());
@@ -65,19 +114,6 @@ export function Progress() {
     }, 300);
     return () => clearTimeout(t);
   }, [currentRankIndex]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (mapRef.current) {
-        setScrollY(mapRef.current.scrollTop);
-      }
-    };
-    const el = mapRef.current;
-    if (el) {
-      el.addEventListener("scroll", handleScroll);
-      return () => el.removeEventListener("scroll", handleScroll);
-    }
-  }, []);
 
   const currentRank = RANKS[currentRankIndex];
   const nextRank = currentRankIndex < RANKS.length - 1 ? RANKS[currentRankIndex + 1] : null;
@@ -197,63 +233,22 @@ export function Progress() {
 
       {/* ============ FULLSCREEN PROGRESSION MAP ============ */}
       <div
-        ref={mapRef}
         style={{
           marginTop: 116,
           height: "calc(100vh - 116px)",
           overflow: "auto",
           position: "relative",
-          perspective: "1400px",
-          perspectiveOrigin: "50% 0%",
           scrollBehavior: "smooth",
           background:
             "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(167,243,208,0.35) 0%, transparent 60%), radial-gradient(ellipse 70% 50% at 50% 100%, rgba(196,181,253,0.3) 0%, transparent 60%), linear-gradient(180deg, #F0F7FF 0%, #F5ECFF 100%)",
         }}
       >
-        {/* Background parallax effect */}
-        <div
-          style={{
-            position: "fixed",
-            top: 116,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "radial-gradient(circle at 50% 40%, rgba(37, 99, 235, 0.05) 0%, transparent 60%)",
-            pointerEvents: "none",
-            transform: `translateY(${scrollY * 0.5}px)`,
-            zIndex: 0,
-          }}
-        />
-
-        {/* Floating particles */}
-        <div style={{ position: "fixed", top: 60, left: 0, right: 0, bottom: 0, pointerEvents: "none", zIndex: 1 }}>
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div
-              key={i}
-              style={{
-                position: "absolute",
-                left: `${Math.random() * 100}%`,
-                top: `${60 + Math.random() * window.innerHeight}px`,
-                width: 4,
-                height: 4,
-                borderRadius: "50%",
-                background: `rgba(37, 99, 235, ${0.1 + Math.random() * 0.2})`,
-                animation: `float ${6 + Math.random() * 4}s ease-in-out infinite`,
-                animationDelay: `${i * 0.5}s`,
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Main Map Content — isometric tilt */}
+        {/* Main Map Content */}
         <div
           style={{
             position: "relative",
             zIndex: 10,
             padding: "80px 40px 200px",
-            transform: "rotateX(8deg)",
-            transformOrigin: "50% 0%",
-            transformStyle: "preserve-3d",
           }}
         >
           <div style={{ maxWidth: 720, margin: "0 auto", position: "relative" }}>
@@ -416,7 +411,7 @@ export function Progress() {
                       </div>
                     )}
 
-                    {/* Pixel art object */}
+                    {/* RPG icon */}
                     <div
                       style={{
                         height: 72,
@@ -424,19 +419,11 @@ export function Progress() {
                         alignItems: "center",
                         justifyContent: "center",
                         marginBottom: 12,
-                        transform: "scale(1.4)",
-                        filter: isUnlocked ? `drop-shadow(0 4px 6px ${rank.glowColor})` : undefined,
-                        animation:
-                          idx % 3 === 0
-                            ? "dumbbell-rock 2s ease-in-out infinite"
-                            : idx % 3 === 1
-                            ? "kettlebell-bounce 2s ease-in-out infinite"
-                            : "trophy-shimmer 3s ease-in-out infinite",
+                        filter: isUnlocked ? `drop-shadow(0 6px 10px ${rank.glowColor})` : undefined,
+                        animation: isCurrentRank ? "iconBob 2.4s ease-in-out infinite" : undefined,
                       }}
                     >
-                      {idx % 3 === 0 && <PixelDumbbell />}
-                      {idx % 3 === 1 && <PixelKettlebell />}
-                      {idx % 3 === 2 && <PixelTrophy />}
+                      <RankIcon idx={idx} color={rank.color} accent={rank.color} />
                     </div>
 
                     {/* Rank Card */}
@@ -518,21 +505,21 @@ export function Progress() {
                       {/* Continue button for current rank */}
                       {isCurrentRank && (
                         <button
+                          onClick={() => onNavigate?.("games")}
                           style={{
                             width: "100%",
-                            padding: "8px 12px",
-                            borderRadius: 8,
+                            padding: "10px 12px",
+                            borderRadius: 10,
                             background: `linear-gradient(135deg, ${rank.color}, ${rank.glowColor})`,
                             border: "none",
                             color: "#fff",
-                            fontWeight: 700,
-                            fontSize: 12,
+                            fontWeight: 800,
+                            fontSize: 13,
                             cursor: "pointer",
-                            boxShadow: `0 0 12px ${rank.glowColor}`,
-                            animation: "shimmerSweep 3s ease-in-out infinite",
+                            boxShadow: `0 6px 18px ${rank.glowColor}`,
                           }}
                         >
-                          Continue →
+                          Продолжить →
                         </button>
                       )}
                     </div>
@@ -549,6 +536,11 @@ export function Progress() {
         @keyframes nodeBob {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-8px); }
+        }
+
+        @keyframes iconBob {
+          0%, 100% { transform: translateY(0) scale(1); }
+          50% { transform: translateY(-6px) scale(1.05); }
         }
 
         @keyframes auraPulse {
@@ -581,12 +573,6 @@ export function Progress() {
           100% { stroke-dashoffset: -1900; }
         }
 
-        @keyframes float {
-          0% { transform: translateY(0) translateX(0); opacity: 0; }
-          50% { opacity: 1; }
-          100% { transform: translateY(-200px) translateX(20px); opacity: 0; }
-        }
-
         @keyframes shimmerSweep {
           0%, 100% { background-position: -200% 0; }
           50% { background-position: 200% 0; }
@@ -615,10 +601,6 @@ export function Progress() {
           transform: translateY(-8px);
         }
 
-        svg {
-          image-rendering: pixelated;
-          image-rendering: crisp-edges;
-        }
       `}</style>
     </div>
   );

@@ -14,18 +14,18 @@ export interface RankData {
 }
 
 export const RANKS: RankData[] = [
-  { id: 1, name: "Beginner", character: "👨‍🌾", color: "#A0AEC0", glowColor: "rgba(160, 174, 192, 0.2)", description: "Персонаж только начинает свой путь.", minXP: 0, animation: "none", quote: "Начало — вот самый сложный шаг." },
-  { id: 2, name: "Recruit", character: "💂", color: "#8B4513", glowColor: "rgba(139, 69, 19, 0.4)", description: "Входит в ритм тренировок.", minXP: 100, animation: "shadowPulse", quote: "Дисциплина — это выбор каждый день." },
-  { id: 3, name: "Apprentice", character: "👨‍🎓", color: "#B87333", glowColor: "rgba(184, 115, 51, 0.4)", description: "Начинает понимать основы.", minXP: 250, animation: "copperShimmer", quote: "Знание приходит через практику." },
-  { id: 4, name: "Athlete", character: "⚔️", color: "#708090", glowColor: "rgba(112, 128, 144, 0.3)", description: "Стабилизирует прогресс.", minXP: 400, animation: "metallicHighlight", quote: "Сила строится день за днём." },
-  { id: 5, name: "Veteran", character: "🛡️", color: "#2F4F4F", glowColor: "rgba(47, 79, 79, 0.4)", description: "Прошёл через испытания.", minXP: 600, animation: "cornerGradient", quote: "Опыт — лучший учитель." },
-  { id: 6, name: "Master", character: "🥷", color: "#0066FF", glowColor: "rgba(0, 102, 255, 0.6)", description: "Научился управлять телом.", minXP: 850, animation: "blueNeonGlow", quote: "Мастер — это тот, кто никогда не бросает." },
-  { id: 7, name: "Pro", character: "🏇", color: "#FFD700", glowColor: "rgba(255, 215, 0, 0.6)", description: "Форма стабильно высока.", minXP: 1150, animation: "goldenGlow", quote: "Профессионализм видно издалека." },
-  { id: 8, name: "Elite", character: "🔱", color: "#00FF64", glowColor: "rgba(0, 255, 100, 0.6)", description: "Естественный максимум развития.", minXP: 1500, animation: "greenShimmer", quote: "Элита редко, но неизбежно." },
-  { id: 9, name: "Champion", character: "🎖️", color: "#FF0040", glowColor: "rgba(255, 0, 64, 0.6)", description: "Достиг и удерживает высоту.", minXP: 1900, animation: "redPulse", quote: "Чемпион — это образ жизни." },
-  { id: 10, name: "Titan", character: "👹", color: "#0064FF", glowColor: "rgba(0, 100, 255, 0.8)", description: "Мощь выходит за пределы.", minXP: 2400, animation: "titanLightning", quote: "Титаны не рождаются — они создаются." },
-  { id: 11, name: "Legend", character: "🐉", color: "#FFB000", glowColor: "rgba(255, 176, 0, 0.7)", description: "Путь стал примером для других.", minXP: 3000, animation: "legendStardust", quote: "Легенды никогда не забываются." },
-  { id: 12, name: "Myth", character: "🌌", color: "#FF00FF", glowColor: "rgba(255, 0, 255, 0.8)", description: "Предел возможного в естественном развитии.", minXP: 3600, animation: "mythRainbow", quote: "Легенды не рождаются — они выживают." },
+  { id: 1, name: "Новичок", character: "👨‍🌾", color: "#A0AEC0", glowColor: "rgba(160, 174, 192, 0.35)", description: "Персонаж только начинает свой путь.", minXP: 0, animation: "none", quote: "Начало — вот самый сложный шаг." },
+  { id: 2, name: "Рекрут", character: "💂", color: "#8B4513", glowColor: "rgba(139, 69, 19, 0.45)", description: "Входит в ритм тренировок.", minXP: 100, animation: "shadowPulse", quote: "Дисциплина — это выбор каждый день." },
+  { id: 3, name: "Ученик", character: "👨‍🎓", color: "#B87333", glowColor: "rgba(184, 115, 51, 0.45)", description: "Начинает понимать основы.", minXP: 250, animation: "copperShimmer", quote: "Знание приходит через практику." },
+  { id: 4, name: "Атлет", character: "⚔️", color: "#708090", glowColor: "rgba(112, 128, 144, 0.45)", description: "Стабилизирует прогресс.", minXP: 400, animation: "metallicHighlight", quote: "Сила строится день за днём." },
+  { id: 5, name: "Ветеран", character: "🛡️", color: "#2F4F4F", glowColor: "rgba(47, 79, 79, 0.5)", description: "Прошёл через испытания.", minXP: 600, animation: "cornerGradient", quote: "Опыт — лучший учитель." },
+  { id: 6, name: "Мастер", character: "🥷", color: "#0066FF", glowColor: "rgba(0, 102, 255, 0.6)", description: "Научился управлять телом.", minXP: 850, animation: "blueNeonGlow", quote: "Мастер — это тот, кто никогда не бросает." },
+  { id: 7, name: "Профи", character: "🏇", color: "#FFD700", glowColor: "rgba(255, 215, 0, 0.6)", description: "Форма стабильно высока.", minXP: 1150, animation: "goldenGlow", quote: "Профессионализм видно издалека." },
+  { id: 8, name: "Элита", character: "🔱", color: "#00C853", glowColor: "rgba(0, 255, 100, 0.6)", description: "Естественный максимум развития.", minXP: 1500, animation: "greenShimmer", quote: "Элита редко, но неизбежно." },
+  { id: 9, name: "Чемпион", character: "🎖️", color: "#FF0040", glowColor: "rgba(255, 0, 64, 0.6)", description: "Достиг и удерживает высоту.", minXP: 1900, animation: "redPulse", quote: "Чемпион — это образ жизни." },
+  { id: 10, name: "Титан", character: "👹", color: "#0064FF", glowColor: "rgba(0, 100, 255, 0.7)", description: "Мощь выходит за пределы.", minXP: 2400, animation: "titanLightning", quote: "Титаны не рождаются — они создаются." },
+  { id: 11, name: "Легенда", character: "🐉", color: "#FFB000", glowColor: "rgba(255, 176, 0, 0.7)", description: "Путь стал примером для других.", minXP: 3000, animation: "legendStardust", quote: "Легенды никогда не забываются." },
+  { id: 12, name: "Миф", character: "🌌", color: "#FF00FF", glowColor: "rgba(255, 0, 255, 0.75)", description: "Предел возможного в естественном развитии.", minXP: 3600, animation: "mythRainbow", quote: "Легенды не рождаются — они выживают." },
 ];
 
 type Log = { date: string };
