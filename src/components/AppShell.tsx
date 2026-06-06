@@ -18,7 +18,7 @@ export function AppShell() {
         {view === "home" && <Home onNavigate={setView} />}
         {view === "workouts" && <Workouts />}
       {view === "games" && <Games />}
-        {view === "progress" && <Progress />}
+        {view === "progress" && <Progress onNavigate={setView} />}
         {view === "guide" && <Guide />}
         {view === "profile" && <Profile />}
       </main>

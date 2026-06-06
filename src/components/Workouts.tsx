@@ -197,8 +197,8 @@ export function Workouts() {
           <Sparkles size={22} color="#fff" />
         </div>
         <div>
-          <h1 style={{ fontSize: 22, fontWeight: 900, color: "#0F172A", letterSpacing: "-0.02em" }}>AI-онбординг программы</h1>
-          <p className="text-soft" style={{ fontSize: 13 }}>Несколько вопросов — и алгоритм соберёт твой план</p>
+          <h1 style={{ fontSize: 22, fontWeight: 900, color: "#0F172A", letterSpacing: "-0.02em" }}>AI-onboarding program</h1>
+          <p className="text-soft" style={{ fontSize: 13 }}>A few questions — and the algorithm will build your plan</p>
         </div>
       </div>
 
