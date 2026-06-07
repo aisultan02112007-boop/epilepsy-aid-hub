@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   Flame, Dumbbell, Scale, Loader2, Sparkles, Save, Play, RefreshCw,
   User, Calendar, Clock, Target, Trophy, ArrowLeft, ArrowRight, Check,
+  ChevronDown, Repeat, Timer, Apple, Heart, Zap,
 } from "lucide-react";
 
 type Exercise = { name: string; sets: number; reps: string; rest: string; tip: string };
@@ -94,6 +95,18 @@ export function Workouts() {
   const save = () => { if (program) { localStorage.setItem(SAVED_KEY, JSON.stringify(program)); alert("Программа сохранена!"); } };
   const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
+  const dayShort = (name: string): string => {
+    const n = (name || "").toLowerCase();
+    if (n.startsWith("пон")) return "Пн";
+    if (n.startsWith("вт")) return "Вт";
+    if (n.startsWith("ср")) return "Ср";
+    if (n.startsWith("чет") || n.startsWith("четв")) return "Чт";
+    if (n.startsWith("пят")) return "Пт";
+    if (n.startsWith("суб")) return "Сб";
+    if (n.startsWith("вос")) return "Вс";
+    return (name || "").slice(0, 2);
+  };
+
   if (loading) {
     return (
       <div className="mx-auto" style={{ maxWidth: 960, padding: "100px 24px 80px" }}>
@@ -108,82 +121,17 @@ export function Workouts() {
   if (program) {
     const d = program.days[activeDay];
     return (
-      <div className="mx-auto animate-fade-up" style={{ maxWidth: 960, padding: "100px 24px 80px" }}>
-        <div className="glass-strong" style={{ padding: 32, marginBottom: 20 }}>
-          <p style={{ color: "#2563EB", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-            {program.split}
-          </p>
-          <h2 style={{ fontSize: 28, fontWeight: 900, color: "#0F172A", letterSpacing: "-0.02em", marginTop: 6 }}>
-            {program.program_name}
-          </h2>
-          <p className="text-soft mt-2">Цель: <strong style={{ color: "#1E293B" }}>{program.goal}</strong> · {program.weekly_calories_deficit_or_surplus}</p>
-          <div className="flex flex-wrap gap-2 mt-5">
-            <button onClick={save} className="btn-outline"><Save size={16} /> Сохранить программу</button>
-            <button onClick={() => setTimer(0)} className="btn-primary"><Play size={16} /> Начать тренировку</button>
-            <button onClick={() => { setProgram(null); setTimer(null); setStep(0); }} className="btn-outline"><RefreshCw size={16} /> Новая программа</button>
-            {timer !== null && (
-              <div style={{ padding: "10px 18px", borderRadius: 12, background: "linear-gradient(135deg, #16A34A, #22C55E)", color: "#fff", fontWeight: 800, fontSize: 16 }}>
-                ⏱ {fmt(timer)}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="flex gap-2 flex-wrap mb-4">
-          {program.days.map((day, i) => (
-            <button
-              key={i}
-              onClick={() => setActiveDay(i)}
-              style={{
-                padding: "10px 16px", borderRadius: 12, fontWeight: 700, fontSize: 13,
-                background: activeDay === i ? "linear-gradient(135deg, #2563EB, #7C3AED)" : "rgba(255,255,255,0.7)",
-                color: activeDay === i ? "#fff" : "#475569",
-                border: "1px solid " + (activeDay === i ? "transparent" : "rgba(148,163,184,0.4)"),
-                cursor: "pointer",
-              }}
-            >
-              {day.day.slice(0, 2)}
-            </button>
-          ))}
-        </div>
-
-        <div className="glass-strong" style={{ padding: 28 }}>
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 style={{ fontSize: 20, fontWeight: 800, color: "#0F172A" }}>{d.day} — {d.focus}</h3>
-              <p className="text-soft" style={{ fontSize: 13 }}>{d.duration_minutes} минут</p>
-            </div>
-          </div>
-          <div className="flex flex-col gap-3">
-            {d.exercises.map((ex, i) => (
-              <div key={i} className="glass-card" style={{ padding: 18 }}>
-                <div className="flex items-start justify-between gap-3 flex-wrap">
-                  <div>
-                    <p style={{ fontWeight: 800, fontSize: 16, color: "#0F172A" }}>{i + 1}. {ex.name}</p>
-                    <p className="text-soft mt-1" style={{ fontSize: 13 }}>💡 {ex.tip}</p>
-                  </div>
-                  <div className="flex gap-2 flex-wrap">
-                    <span style={{ padding: "6px 12px", borderRadius: 999, background: "rgba(37,99,235,0.15)", color: "#1E40AF", fontSize: 12, fontWeight: 700, border: "1px solid rgba(37,99,235,0.3)" }}>{ex.sets} × {ex.reps}</span>
-                    <span style={{ padding: "6px 12px", borderRadius: 999, background: "rgba(37,99,235,0.15)", color: "#1E40AF", fontSize: 12, fontWeight: 700, border: "1px solid rgba(37,99,235,0.3)" }}>Отдых {ex.rest}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-5" style={{ padding: 16, borderRadius: 14, background: "linear-gradient(135deg, rgba(249,115,22,0.15), rgba(239,68,68,0.1))", border: "1px solid rgba(249,115,22,0.3)" }}>
-            <p style={{ fontWeight: 700, color: "#9A3412" }}>🏃 Кардио: {d.cardio}</p>
-          </div>
-        </div>
-
-        <div className="glass mt-5" style={{ padding: 24 }}>
-          <p style={{ fontWeight: 700, color: "#0F172A", marginBottom: 6 }}>🍎 Совет по питанию</p>
-          <p className="text-soft" style={{ fontSize: 14, lineHeight: 1.6 }}>{program.nutrition_tip}</p>
-        </div>
-        <div className="glass mt-4" style={{ padding: 24 }}>
-          <p style={{ fontWeight: 700, color: "#0F172A", marginBottom: 6 }}>✨ Мотивация</p>
-          <p className="text-soft" style={{ fontSize: 14, lineHeight: 1.6 }}>{program.motivation}</p>
-        </div>
-      </div>
+      <ProgramView
+        program={program}
+        activeDay={activeDay}
+        setActiveDay={setActiveDay}
+        timer={timer}
+        setTimer={setTimer}
+        fmt={fmt}
+        save={save}
+        reset={() => { setProgram(null); setTimer(null); setStep(0); }}
+        dayShort={dayShort}
+      />
     );
   }
 
@@ -520,5 +468,221 @@ function OptionCard({ active, onClick, title, subtitle, emoji }: { active: boole
       <span style={{ fontSize: emoji ? 16 : 24, fontWeight: 800, color: "#0F172A", marginTop: emoji ? 6 : 0 }}>{title}</span>
       {subtitle && <span className="text-soft" style={{ fontSize: 12, marginTop: 2 }}>{subtitle}</span>}
     </button>
+  );
+}
+
+function ProgramView({
+  program, activeDay, setActiveDay, timer, setTimer, fmt, save, reset, dayShort,
+}: {
+  program: Program;
+  activeDay: number;
+  setActiveDay: (i: number) => void;
+  timer: number | null;
+  setTimer: (n: number | null) => void;
+  fmt: (s: number) => string;
+  save: () => void;
+  reset: () => void;
+  dayShort: (name: string) => string;
+}) {
+  const d = program.days[activeDay];
+  const [expanded, setExpanded] = useState<Record<number, boolean>>({});
+  const [done, setDone] = useState<Record<string, boolean>>({});
+  const toggle = (i: number) => setExpanded((e) => ({ ...e, [i]: !e[i] }));
+  const markDone = (i: number) => setDone((s) => ({ ...s, [`${activeDay}-${i}`]: !s[`${activeDay}-${i}`] }));
+  const doneCount = d.exercises.filter((_, i) => done[`${activeDay}-${i}`]).length;
+  const progressPct = d.exercises.length ? (doneCount / d.exercises.length) * 100 : 0;
+
+  return (
+    <div className="mx-auto animate-fade-up" style={{ maxWidth: 760, padding: "100px 16px 100px" }}>
+      {/* Hero */}
+      <div className="glass-strong" style={{ padding: 24, marginBottom: 16, borderRadius: 24, position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(120% 80% at 100% 0%, rgba(124,58,237,0.12), transparent 60%)", pointerEvents: "none" }} />
+        <div style={{ position: "relative" }}>
+          <div className="flex items-center gap-2" style={{ marginBottom: 8 }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 10px", borderRadius: 999, background: "rgba(37,99,235,0.12)", border: "1px solid rgba(37,99,235,0.25)", color: "#2563EB", fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+              <Sparkles size={11} /> {program.split}
+            </span>
+          </div>
+          <h2 style={{ fontSize: 24, fontWeight: 900, color: "#0F172A", letterSpacing: "-0.02em", lineHeight: 1.15 }}>
+            {program.program_name}
+          </h2>
+          <div className="flex flex-wrap gap-2" style={{ marginTop: 14 }}>
+            <Pill icon={<Target size={12} />} label={program.goal} tone="blue" />
+            <Pill icon={<Zap size={12} />} label={program.weekly_calories_deficit_or_surplus} tone="violet" />
+          </div>
+          <div className="flex flex-wrap gap-2" style={{ marginTop: 16 }}>
+            <button onClick={() => setTimer(timer === null ? 0 : null)} className="btn-primary" style={{ padding: "10px 16px" }}>
+              <Play size={15} /> {timer === null ? "Начать" : "Стоп"}
+            </button>
+            <button onClick={save} className="btn-outline" style={{ padding: "10px 14px" }}><Save size={15} /> Сохранить</button>
+            <button onClick={reset} className="btn-outline" style={{ padding: "10px 14px" }}><RefreshCw size={15} /> Заново</button>
+            {timer !== null && (
+              <div style={{ marginLeft: "auto", padding: "10px 14px", borderRadius: 12, background: "linear-gradient(135deg, #16A34A, #22C55E)", color: "#fff", fontWeight: 800, fontSize: 14, display: "inline-flex", alignItems: "center", gap: 6, boxShadow: "0 8px 22px rgba(34,197,94,0.35)" }}>
+                <Timer size={14} /> {fmt(timer)}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Day tabs */}
+      <div style={{ display: "grid", gridTemplateColumns: `repeat(${program.days.length}, 1fr)`, gap: 8, marginBottom: 16 }}>
+        {program.days.map((day, i) => {
+          const active = activeDay === i;
+          return (
+            <button
+              key={i}
+              onClick={() => setActiveDay(i)}
+              style={{
+                padding: "12px 6px", borderRadius: 14, fontWeight: 800, fontSize: 13,
+                background: active ? "linear-gradient(135deg, #2563EB, #7C3AED)" : "rgba(255,255,255,0.75)",
+                color: active ? "#fff" : "#475569",
+                border: active ? "1px solid transparent" : "1px solid rgba(148,163,184,0.35)",
+                boxShadow: active ? "0 8px 20px rgba(37,99,235,0.35)" : "none",
+                cursor: "pointer",
+                display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+                transition: "all 0.25s ease",
+              }}
+            >
+              <span style={{ fontSize: 14 }}>{dayShort(day.day)}</span>
+              <span style={{ fontSize: 10, opacity: 0.75, fontWeight: 600 }}>{day.duration_minutes}м</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Day header card */}
+      <div className="glass-strong" style={{ padding: 20, borderRadius: 20, marginBottom: 14 }}>
+        <div className="flex items-start justify-between gap-3">
+          <div style={{ minWidth: 0 }}>
+            <p style={{ color: "#7C3AED", fontSize: 11, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase" }}>{d.day}</p>
+            <h3 style={{ fontSize: 19, fontWeight: 900, color: "#0F172A", letterSpacing: "-0.01em", marginTop: 2 }}>{d.focus}</h3>
+          </div>
+          <div style={{ textAlign: "right", flexShrink: 0 }}>
+            <p style={{ fontSize: 11, color: "#64748B", fontWeight: 600 }}>{doneCount}/{d.exercises.length}</p>
+            <p style={{ fontSize: 11, color: "#64748B", fontWeight: 600, marginTop: 2 }}><Clock size={10} style={{ display: "inline", verticalAlign: -1 }} /> {d.duration_minutes} мин</p>
+          </div>
+        </div>
+        <div style={{ height: 6, borderRadius: 999, background: "rgba(148,163,184,0.18)", overflow: "hidden", marginTop: 12 }}>
+          <div style={{ height: "100%", width: `${progressPct}%`, background: "linear-gradient(90deg, #2563EB, #7C3AED)", transition: "width 0.4s ease", boxShadow: "0 0 12px rgba(37,99,235,0.4)" }} />
+        </div>
+      </div>
+
+      {/* Exercise list */}
+      <div className="flex flex-col" style={{ gap: 10 }}>
+        {d.exercises.map((ex, i) => {
+          const isOpen = !!expanded[i];
+          const isDone = !!done[`${activeDay}-${i}`];
+          return (
+            <div
+              key={i}
+              className="glass-card"
+              style={{
+                padding: 0, borderRadius: 18, overflow: "hidden",
+                border: isDone ? "1.5px solid rgba(34,197,94,0.5)" : "1px solid rgba(255,255,255,0.9)",
+                boxShadow: isDone ? "0 8px 22px rgba(34,197,94,0.15)" : undefined,
+                transition: "border-color 0.25s ease, box-shadow 0.25s ease",
+              }}
+            >
+              <div className="flex items-center gap-3" style={{ padding: "14px 16px" }}>
+                <button
+                  onClick={() => markDone(i)}
+                  aria-label="Отметить"
+                  style={{
+                    width: 32, height: 32, borderRadius: 10, flexShrink: 0,
+                    background: isDone ? "linear-gradient(135deg, #16A34A, #22C55E)" : "rgba(241,245,249,0.9)",
+                    border: isDone ? "1px solid transparent" : "1px solid rgba(148,163,184,0.35)",
+                    color: isDone ? "#fff" : "#94A3B8",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontWeight: 800, fontSize: 13, cursor: "pointer",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  {isDone ? <Check size={16} strokeWidth={3} /> : i + 1}
+                </button>
+                <button onClick={() => toggle(i)} style={{ flex: 1, minWidth: 0, textAlign: "left", background: "transparent", border: "none", cursor: "pointer", padding: 0 }}>
+                  <p style={{ fontWeight: 800, fontSize: 15, color: "#0F172A", letterSpacing: "-0.01em", textDecoration: isDone ? "line-through" : "none", opacity: isDone ? 0.6 : 1 }}>
+                    {ex.name}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5" style={{ marginTop: 6 }}>
+                    <Chip icon={<Repeat size={10} />}>{ex.sets} × {ex.reps}</Chip>
+                    <Chip icon={<Timer size={10} />}>{ex.rest}</Chip>
+                  </div>
+                </button>
+                <button
+                  onClick={() => toggle(i)}
+                  aria-label="Подробнее"
+                  style={{
+                    width: 30, height: 30, borderRadius: 10, flexShrink: 0,
+                    background: "rgba(241,245,249,0.85)", border: "1px solid rgba(148,163,184,0.3)",
+                    color: "#475569", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
+                    transition: "transform 0.25s ease",
+                    transform: isOpen ? "rotate(180deg)" : "rotate(0)",
+                  }}
+                >
+                  <ChevronDown size={16} />
+                </button>
+              </div>
+              {isOpen && (
+                <div style={{ padding: "0 16px 14px 60px" }}>
+                  <div style={{ padding: 12, borderRadius: 12, background: "rgba(37,99,235,0.06)", border: "1px solid rgba(37,99,235,0.15)" }}>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: "#2563EB", marginBottom: 4, letterSpacing: "0.05em", textTransform: "uppercase" }}>Совет</p>
+                    <p style={{ fontSize: 13, color: "#334155", lineHeight: 1.55 }}>{ex.tip}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Cardio */}
+      <div style={{ marginTop: 14, padding: 16, borderRadius: 16, background: "linear-gradient(135deg, rgba(249,115,22,0.12), rgba(239,68,68,0.08))", border: "1px solid rgba(249,115,22,0.25)", display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ width: 38, height: 38, borderRadius: 12, background: "linear-gradient(135deg, #F97316, #EF4444)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 6px 16px rgba(249,115,22,0.35)" }}>
+          <Heart size={18} color="#fff" />
+        </div>
+        <div style={{ minWidth: 0 }}>
+          <p style={{ fontSize: 11, fontWeight: 800, color: "#9A3412", letterSpacing: "0.08em", textTransform: "uppercase" }}>Кардио</p>
+          <p style={{ fontSize: 14, color: "#1E293B", fontWeight: 600, marginTop: 2 }}>{d.cardio}</p>
+        </div>
+      </div>
+
+      {/* Tips */}
+      <InfoCard icon={<Apple size={16} color="#fff" />} gradient="linear-gradient(135deg, #10B981, #059669)" title="Питание" body={program.nutrition_tip} />
+      <InfoCard icon={<Sparkles size={16} color="#fff" />} gradient="linear-gradient(135deg, #2563EB, #7C3AED)" title="Мотивация" body={program.motivation} />
+    </div>
+  );
+}
+
+function Pill({ icon, label, tone }: { icon: React.ReactNode; label: string; tone: "blue" | "violet" }) {
+  const bg = tone === "blue" ? "rgba(37,99,235,0.1)" : "rgba(124,58,237,0.1)";
+  const bd = tone === "blue" ? "rgba(37,99,235,0.25)" : "rgba(124,58,237,0.25)";
+  const c = tone === "blue" ? "#1E40AF" : "#6D28D9";
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 10px", borderRadius: 999, background: bg, border: `1px solid ${bd}`, color: c, fontSize: 12, fontWeight: 700 }}>
+      {icon} {label}
+    </span>
+  );
+}
+
+function Chip({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "4px 8px", borderRadius: 8, background: "rgba(241,245,249,0.9)", border: "1px solid rgba(148,163,184,0.3)", color: "#475569", fontSize: 11, fontWeight: 700 }}>
+      {icon} {children}
+    </span>
+  );
+}
+
+function InfoCard({ icon, gradient, title, body }: { icon: React.ReactNode; gradient: string; title: string; body: string }) {
+  return (
+    <div className="glass" style={{ marginTop: 12, padding: 16, borderRadius: 16, display: "flex", gap: 12, alignItems: "flex-start" }}>
+      <div style={{ width: 34, height: 34, borderRadius: 11, background: gradient, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 6px 14px rgba(0,0,0,0.1)" }}>
+        {icon}
+      </div>
+      <div style={{ minWidth: 0 }}>
+        <p style={{ fontSize: 11, fontWeight: 800, color: "#0F172A", letterSpacing: "0.08em", textTransform: "uppercase" }}>{title}</p>
+        <p style={{ fontSize: 13, color: "#475569", lineHeight: 1.6, marginTop: 4 }}>{body}</p>
+      </div>
+    </div>
   );
 }
