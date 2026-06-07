@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   Flame, Dumbbell, Scale, Loader2, Sparkles, Save, Play, RefreshCw,
   User, Calendar, Clock, Target, Trophy, ArrowLeft, ArrowRight, Check,
+  ChevronDown, Repeat, Timer, Apple, Heart, Zap,
 } from "lucide-react";
 
 type Exercise = { name: string; sets: number; reps: string; rest: string; tip: string };
@@ -94,6 +95,18 @@ export function Workouts() {
   const save = () => { if (program) { localStorage.setItem(SAVED_KEY, JSON.stringify(program)); alert("Программа сохранена!"); } };
   const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
+  const dayShort = (name: string): string => {
+    const n = (name || "").toLowerCase();
+    if (n.startsWith("пон")) return "Пн";
+    if (n.startsWith("вт")) return "Вт";
+    if (n.startsWith("ср")) return "Ср";
+    if (n.startsWith("чет") || n.startsWith("четв")) return "Чт";
+    if (n.startsWith("пят")) return "Пт";
+    if (n.startsWith("суб")) return "Сб";
+    if (n.startsWith("вос")) return "Вс";
+    return (name || "").slice(0, 2);
+  };
+
   if (loading) {
     return (
       <div className="mx-auto" style={{ maxWidth: 960, padding: "100px 24px 80px" }}>
@@ -108,82 +121,17 @@ export function Workouts() {
   if (program) {
     const d = program.days[activeDay];
     return (
-      <div className="mx-auto animate-fade-up" style={{ maxWidth: 960, padding: "100px 24px 80px" }}>
-        <div className="glass-strong" style={{ padding: 32, marginBottom: 20 }}>
-          <p style={{ color: "#2563EB", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-            {program.split}
-          </p>
-          <h2 style={{ fontSize: 28, fontWeight: 900, color: "#0F172A", letterSpacing: "-0.02em", marginTop: 6 }}>
-            {program.program_name}
-          </h2>
-          <p className="text-soft mt-2">Цель: <strong style={{ color: "#1E293B" }}>{program.goal}</strong> · {program.weekly_calories_deficit_or_surplus}</p>
-          <div className="flex flex-wrap gap-2 mt-5">
-            <button onClick={save} className="btn-outline"><Save size={16} /> Сохранить программу</button>
-            <button onClick={() => setTimer(0)} className="btn-primary"><Play size={16} /> Начать тренировку</button>
-            <button onClick={() => { setProgram(null); setTimer(null); setStep(0); }} className="btn-outline"><RefreshCw size={16} /> Новая программа</button>
-            {timer !== null && (
-              <div style={{ padding: "10px 18px", borderRadius: 12, background: "linear-gradient(135deg, #16A34A, #22C55E)", color: "#fff", fontWeight: 800, fontSize: 16 }}>
-                ⏱ {fmt(timer)}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="flex gap-2 flex-wrap mb-4">
-          {program.days.map((day, i) => (
-            <button
-              key={i}
-              onClick={() => setActiveDay(i)}
-              style={{
-                padding: "10px 16px", borderRadius: 12, fontWeight: 700, fontSize: 13,
-                background: activeDay === i ? "linear-gradient(135deg, #2563EB, #7C3AED)" : "rgba(255,255,255,0.7)",
-                color: activeDay === i ? "#fff" : "#475569",
-                border: "1px solid " + (activeDay === i ? "transparent" : "rgba(148,163,184,0.4)"),
-                cursor: "pointer",
-              }}
-            >
-              {day.day.slice(0, 2)}
-            </button>
-          ))}
-        </div>
-
-        <div className="glass-strong" style={{ padding: 28 }}>
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 style={{ fontSize: 20, fontWeight: 800, color: "#0F172A" }}>{d.day} — {d.focus}</h3>
-              <p className="text-soft" style={{ fontSize: 13 }}>{d.duration_minutes} минут</p>
-            </div>
-          </div>
-          <div className="flex flex-col gap-3">
-            {d.exercises.map((ex, i) => (
-              <div key={i} className="glass-card" style={{ padding: 18 }}>
-                <div className="flex items-start justify-between gap-3 flex-wrap">
-                  <div>
-                    <p style={{ fontWeight: 800, fontSize: 16, color: "#0F172A" }}>{i + 1}. {ex.name}</p>
-                    <p className="text-soft mt-1" style={{ fontSize: 13 }}>💡 {ex.tip}</p>
-                  </div>
-                  <div className="flex gap-2 flex-wrap">
-                    <span style={{ padding: "6px 12px", borderRadius: 999, background: "rgba(37,99,235,0.15)", color: "#1E40AF", fontSize: 12, fontWeight: 700, border: "1px solid rgba(37,99,235,0.3)" }}>{ex.sets} × {ex.reps}</span>
-                    <span style={{ padding: "6px 12px", borderRadius: 999, background: "rgba(37,99,235,0.15)", color: "#1E40AF", fontSize: 12, fontWeight: 700, border: "1px solid rgba(37,99,235,0.3)" }}>Отдых {ex.rest}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-5" style={{ padding: 16, borderRadius: 14, background: "linear-gradient(135deg, rgba(249,115,22,0.15), rgba(239,68,68,0.1))", border: "1px solid rgba(249,115,22,0.3)" }}>
-            <p style={{ fontWeight: 700, color: "#9A3412" }}>🏃 Кардио: {d.cardio}</p>
-          </div>
-        </div>
-
-        <div className="glass mt-5" style={{ padding: 24 }}>
-          <p style={{ fontWeight: 700, color: "#0F172A", marginBottom: 6 }}>🍎 Совет по питанию</p>
-          <p className="text-soft" style={{ fontSize: 14, lineHeight: 1.6 }}>{program.nutrition_tip}</p>
-        </div>
-        <div className="glass mt-4" style={{ padding: 24 }}>
-          <p style={{ fontWeight: 700, color: "#0F172A", marginBottom: 6 }}>✨ Мотивация</p>
-          <p className="text-soft" style={{ fontSize: 14, lineHeight: 1.6 }}>{program.motivation}</p>
-        </div>
-      </div>
+      <ProgramView
+        program={program}
+        activeDay={activeDay}
+        setActiveDay={setActiveDay}
+        timer={timer}
+        setTimer={setTimer}
+        fmt={fmt}
+        save={save}
+        reset={() => { setProgram(null); setTimer(null); setStep(0); }}
+        dayShort={dayShort}
+      />
     );
   }
 
