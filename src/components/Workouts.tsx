@@ -192,34 +192,113 @@ export function Workouts() {
   return (
     <div className="mx-auto" style={{ maxWidth: 720, padding: "100px 24px 80px" }}>
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6 animate-fade-up">
-        <div className="flex items-center justify-center" style={{ width: 44, height: 44, borderRadius: 14, background: "linear-gradient(135deg, #2563EB, #7C3AED)", boxShadow: "0 6px 18px rgba(37,99,235,0.4)" }}>
-          <Sparkles size={22} color="#fff" />
+      <div className="flex items-center gap-3 mb-8 animate-fade-up">
+        <div className="flex items-center justify-center" style={{ width: 48, height: 48, borderRadius: 16, background: "linear-gradient(135deg, #2563EB, #7C3AED)", boxShadow: "0 8px 24px rgba(37,99,235,0.4)" }}>
+          <Sparkles size={24} color="#fff" />
         </div>
         <div>
-          <h1 style={{ fontSize: 22, fontWeight: 900, color: "#0F172A", letterSpacing: "-0.02em" }}>AI-onboarding program</h1>
-          <p className="text-soft" style={{ fontSize: 13 }}>A few questions — and the algorithm will build your plan</p>
+          <h1 style={{ fontSize: 24, fontWeight: 900, color: "#0F172A", letterSpacing: "-0.02em" }}>ИИ ассистент FitCare</h1>
+          <p className="text-soft" style={{ fontSize: 14, marginTop: 2 }}>Ответь на несколько вопросов — и ИИ составит твою программу</p>
         </div>
       </div>
 
-      {/* Progress + steps */}
-      <div className="glass mb-5" style={{ padding: 18 }}>
-        <div className="flex items-center justify-between mb-2.5">
-          <span style={{ fontSize: 13, fontWeight: 700, color: "#0F172A" }}>
-            Шаг {step + 1} из {STEPS.length} · {STEPS[step]}
+      {/* Step indicator */}
+      <div className="glass mb-6 animate-fade-up" style={{ padding: "24px 20px" }}>
+        <div className="flex items-center justify-between relative" style={{ marginBottom: 12 }}>
+          {STEPS.map((label, i) => {
+            const isDone = i < step;
+            const isCurrent = i === step;
+            return (
+              <div key={i} className="flex flex-col items-center" style={{ flex: 1, position: "relative", zIndex: 2 }}>
+                <div
+                  className="flex items-center justify-center"
+                  style={{
+                    width: isCurrent ? 40 : 32,
+                    height: isCurrent ? 40 : 32,
+                    borderRadius: "50%",
+                    background: isDone
+                      ? "linear-gradient(135deg, #2563EB, #7C3AED)"
+                      : isCurrent
+                      ? "linear-gradient(135deg, #2563EB, #7C3AED)"
+                      : "rgba(255,255,255,0.8)",
+                    border: isDone || isCurrent ? "2px solid transparent" : "2px solid rgba(148,163,184,0.4)",
+                    color: isDone || isCurrent ? "#fff" : "#64748B",
+                    fontWeight: 800,
+                    fontSize: isCurrent ? 15 : 13,
+                    transition: "all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                    boxShadow: isCurrent
+                      ? "0 0 0 4px rgba(37,99,235,0.15), 0 6px 18px rgba(37,99,235,0.35)"
+                      : isDone
+                      ? "0 4px 12px rgba(37,99,235,0.25)"
+                      : "none",
+                  }}
+                >
+                  {isDone ? <Check size={16} strokeWidth={3} /> : i + 1}
+                </div>
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: isCurrent ? 700 : 500,
+                    color: isCurrent ? "#2563EB" : isDone ? "#1E293B" : "#94A3B8",
+                    marginTop: 8,
+                    transition: "color 0.3s ease",
+                    textAlign: "center",
+                    lineHeight: 1.2,
+                    maxWidth: 70,
+                  }}
+                >
+                  {label}
+                </span>
+              </div>
+            );
+          })}
+          {/* Connector line behind circles */}
+          <div
+            style={{
+              position: "absolute",
+              top: 16,
+              left: "8%",
+              right: "8%",
+              height: 3,
+              borderRadius: 3,
+              background: "rgba(148,163,184,0.2)",
+              zIndex: 1,
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              top: 16,
+              left: "8%",
+              width: `${(step / (STEPS.length - 1)) * 84}%`,
+              height: 3,
+              borderRadius: 3,
+              background: "linear-gradient(90deg, #2563EB, #7C3AED)",
+              zIndex: 1,
+              transition: "width 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+            }}
+          />
+        </div>
+
+        {/* Current step title + progress percent */}
+        <div className="flex items-center justify-between" style={{ marginTop: 8 }}>
+          <span style={{ fontSize: 14, fontWeight: 700, color: "#0F172A" }}>
+            {STEPS[step]}
           </span>
-          <span className="text-soft" style={{ fontSize: 12 }}>{Math.round(progressPct)}%</span>
+          <span className="text-soft" style={{ fontSize: 13, fontWeight: 600 }}>
+            {Math.round(progressPct)}%
+          </span>
         </div>
-        <div style={{ height: 8, borderRadius: 999, background: "rgba(148,163,184,0.25)", overflow: "hidden" }}>
-          <div style={{ height: "100%", width: `${progressPct}%`, background: "linear-gradient(90deg, #2563EB, #7C3AED)", transition: "width 0.45s ease", boxShadow: "0 0 12px rgba(37,99,235,0.5)" }} />
-        </div>
-        <div className="flex gap-1.5 mt-3">
-          {STEPS.map((_, i) => (
-            <div key={i} style={{
-              flex: 1, height: 4, borderRadius: 99,
-              background: i < step ? "linear-gradient(90deg, #2563EB, #7C3AED)" : i === step ? "rgba(37,99,235,0.5)" : "rgba(148,163,184,0.25)"
-            }} />
-          ))}
+        <div style={{ height: 6, borderRadius: 999, background: "rgba(148,163,184,0.2)", overflow: "hidden", marginTop: 10 }}>
+          <div
+            style={{
+              height: "100%",
+              width: `${progressPct}%`,
+              background: "linear-gradient(90deg, #2563EB, #7C3AED)",
+              transition: "width 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+              boxShadow: "0 0 12px rgba(37,99,235,0.4)",
+            }}
+          />
         </div>
       </div>
 
