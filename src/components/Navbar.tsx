@@ -7,7 +7,7 @@ export type ViewKey = "home" | "workouts" | "games" | "progress" | "guide" | "pr
 const NAV: { key: ViewKey; label: string }[] = [
   { key: "home", label: "Главная" },
   { key: "workouts", label: "Программы" },
-  { key: "games", label: "Игры" },
+  { key: "games", label: "Арена" },
   { key: "progress", label: "Прогресс" },
   { key: "guide", label: "Гид" },
 ];
