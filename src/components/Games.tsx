@@ -249,18 +249,6 @@ function Hub({ stats, setTab, onRefresh }: { stats: ReturnType<typeof computeXP>
         </div>
       </div>
 
-      {/* MINI-GAMES GRID */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <Gamepad2 size={18} color="#2563EB" />
-          <h3 style={{ fontSize: 20, fontWeight: 800, color: "#0F172A" }}>Мини-игры</h3>
-        </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <GameCard tab="quiz" icon={Brain} title="Fitness Quiz" desc="Проверь знания о теле и питании" xp="до 1000 XP" gradient="linear-gradient(135deg, #2563EB, #7C3AED)" onClick={setTab} />
-          <GameCard tab="reflex" icon={Zap} title="Reflex Trainer" desc="Тренируй скорость реакции" xp="до 150 XP" gradient="linear-gradient(135deg, #06B6D4, #2563EB)" onClick={setTab} />
-          <GameCard tab="macro" icon={Target} title="Macro Match" desc="Сортируй продукты по макронутриентам" xp="до 130 XP" gradient="linear-gradient(135deg, #F59E0B, #EF4444)" onClick={setTab} />
-        </div>
-      </div>
 
       {/* AWARDS */}
       <div>
