@@ -1,288 +1,283 @@
-import { useEffect, useState } from "react";
-import { Dumbbell, LogOut, Menu, X } from "lucide-react";
+import { useState } from "react";
+import { Dumbbell, Menu, X, Sun, Moon } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { useTheme } from "@/hooks/useTheme";
 
-export type ViewKey = "home" | "workouts" | "games" | "progress" | "guide" | "profile";
-
-const NAV: { key: ViewKey; label: string }[] = [
-  { key: "home", label: "Главная" },
-  { key: "workouts", label: "Программы" },
-  { key: "games", label: "Арена" },
-  { key: "progress", label: "Прогресс" },
-  { key: "guide", label: "Гид" },
-];
-
-export function Navbar({
-  active,
-  onNavigate,
-}: {
-  active: ViewKey;
-  onNavigate: (v: ViewKey) => void;
-}) {
+export function Navbar({ onNavigate }: { onNavigate: (v: string) => void }) {
   const { user, logout } = useAuth();
-  const [hovered, setHovered] = useState<ViewKey | null>(null);
+  const { isDark, toggleTheme } = useTheme();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  const initials = (user?.name || "U")
-    .split(" ")
-    .map((s) => s[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+  const navLinks = [
+    { label: "Главная", key: "home" },
+    { label: "Программы", key: "programs" },
+    { label: "Игры", key: "games" },
+    { label: "Прогресс", key: "progress" },
+    { label: "Гид", key: "guide" },
+  ];
 
   return (
-    <nav
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 50,
-        backdropFilter: "blur(24px)",
-        WebkitBackdropFilter: "blur(24px)",
-        background: "rgba(255,255,255,0.7)",
-        borderBottom: "1px solid rgba(255,255,255,0.2)",
-        boxShadow: "0 6px 24px -12px rgba(15,23,42,0.12)",
-      }}
-    >
-      <div
-        className="mx-auto flex items-center justify-between"
-        style={{ maxWidth: 1200, padding: "18px 24px" }}
+    <>
+      <nav
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 64,
+          background: "rgba(255, 255, 255, 0.7)",
+          backdropFilter: "blur(24px)",
+          border: "1px solid rgba(255, 255, 255, 0.8)",
+          zIndex: 50,
+          transition: "all 0.4s ease",
+        }}
+        className="dark:bg-[rgba(20,30,60,0.7)] dark:border-[rgba(100,150,255,0.2)]"
       >
-        {/* Left: Logo */}
-        <button
-          onClick={() => onNavigate("home")}
-          className="flex items-center gap-2.5 flex-shrink-0"
-          style={{ background: "none", border: "none", cursor: "pointer", color: "#0F172A" }}
-        >
-          <div
-            className="flex items-center justify-center"
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 10,
-              background: "linear-gradient(135deg, #6D28D9, #7C3AED 55%, #2563EB)",
-              boxShadow: "0 6px 18px rgba(109,40,217,0.4)",
-            }}
-          >
-            <Dumbbell size={18} color="#fff" strokeWidth={2.5} />
-          </div>
-          <span style={{ fontWeight: 800, fontSize: 18, letterSpacing: "-0.02em" }}>
-            FitCare
-          </span>
-        </button>
-
-        {/* Center: Navigation Links (Desktop Only) */}
-        <div className="hidden md:flex items-center gap-1">
-          {NAV.map((n) => {
-            const isActive = active === n.key;
-            const isHover = hovered === n.key;
-            return (
-              <button
-                key={n.key}
-                onClick={() => onNavigate(n.key)}
-                onMouseEnter={() => setHovered(n.key)}
-                onMouseLeave={() => setHovered(null)}
-                style={{
-                  background: isActive
-                    ? "rgba(37,99,235,0.10)"
-                    : isHover
-                    ? "rgba(37,99,235,0.06)"
-                    : "transparent",
-                  border: "none",
-                  color: isActive || isHover ? "#2563EB" : "#475569",
-                  fontWeight: isActive ? 700 : 500,
-                  fontSize: 14,
-                  padding: "10px 16px",
-                  borderRadius: 10,
-                  cursor: "pointer",
-                  position: "relative",
-                  transition: "all 0.2s ease",
-                }}
-              >
-                {n.label}
-                {isActive && (
-                  <span
-                    style={{
-                      position: "absolute",
-                      bottom: 2,
-                      left: "18%",
-                      right: "18%",
-                      height: 2,
-                      background: "linear-gradient(90deg, #6D28D9, #2563EB)",
-                      borderRadius: 2,
-                    }}
-                  />
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Right: Avatar and Logout Button (Desktop Only) */}
-        <div className="hidden md:flex items-center gap-3 flex-shrink-0">
-          <button
-            onClick={() => onNavigate("profile")}
-            title={user?.name}
-            style={{
-              width: 38,
-              height: 38,
-              borderRadius: "50%",
-              background: "linear-gradient(135deg, #2563EB, #7C3AED)",
-              color: "#fff",
-              fontSize: 13,
-              fontWeight: 700,
-              border: "2px solid #fff",
-              boxShadow: "0 4px 14px rgba(37,99,235,0.4)",
-              cursor: "pointer",
-            }}
-          >
-            {initials}
-          </button>
-          <button
-            onClick={logout}
-            title="Выйти"
-            style={{
-              height: 38,
-              padding: "0 14px",
-              borderRadius: 10,
-              background: "rgba(255,255,255,0.7)",
-              border: "1px solid rgba(148,163,184,0.35)",
-              color: "#475569",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 6,
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-            }}
-          >
-            <LogOut size={16} /> Выйти
-          </button>
-        </div>
-
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setIsMobileOpen(!isMobileOpen)}
-          className="md:hidden flex items-center justify-center"
+        <div
           style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "#0F172A",
-            padding: "8px",
+            maxWidth: 1400,
+            margin: "0 auto",
+            height: "100%",
+            padding: "0 24px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
           }}
         >
-          {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-      </div>
+          {/* Left: Logo */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              cursor: "pointer",
+            }}
+            onClick={() => onNavigate("home")}
+          >
+            <div
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 12,
+                background: "linear-gradient(135deg, #2563EB, #7C3AED)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Dumbbell size={20} color="#fff" strokeWidth={2.4} />
+            </div>
+            <span
+              style={{
+                fontSize: 18,
+                fontWeight: 800,
+                color: "#1E293B",
+                transition: "color 0.4s ease",
+              }}
+              className="dark:text-[#E2E8F0]"
+            >
+              FitCare
+            </span>
+          </div>
+
+          {/* Center: Nav Links (Desktop Only) */}
+          <div
+            style={{
+              display: "none",
+              alignItems: "center",
+              gap: 8,
+              "@media (min-width: 1024px)": {
+                display: "flex",
+              },
+            }}
+            className="hidden lg:flex"
+          >
+            {navLinks.map((link) => (
+              <button
+                key={link.key}
+                onClick={() => onNavigate(link.key)}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: 8,
+                  background: "transparent",
+                  border: "none",
+                  color: "#475569",
+                  fontSize: 14,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                }}
+                className="hover:text-[#2563EB] hover:bg-[rgba(37,99,235,0.1)] dark:text-[#A0AEC0] dark:hover:text-[#6DAAFF] dark:hover:bg-[rgba(100,150,255,0.1)]"
+              >
+                {link.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Right: Theme Switcher + Avatar + Logout */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+            }}
+          >
+            {/* Theme Switcher */}
+            <button
+              onClick={toggleTheme}
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 10,
+                background: "rgba(255, 255, 255, 0.5)",
+                border: "1px solid rgba(148, 163, 184, 0.2)",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "all 0.3s ease",
+                color: "#475569",
+              }}
+              className="hover:bg-[rgba(255,255,255,0.8)] dark:bg-[rgba(30,50,100,0.4)] dark:border-[rgba(100,150,255,0.2)] dark:text-[#A0AEC0] dark:hover:bg-[rgba(50,80,150,0.6)]"
+              title={isDark ? "Light mode" : "Dark mode"}
+            >
+              {isDark ? (
+                <Sun size={18} style={{ animation: "rotate 0.3s ease-in-out" }} />
+              ) : (
+                <Moon size={18} style={{ animation: "rotate 0.3s ease-in-out" }} />
+              )}
+            </button>
+
+            {user && (
+              <>
+                {/* Avatar */}
+                <div
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: "50%",
+                    background: "linear-gradient(135deg, #2563EB, #7C3AED)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#fff",
+                    fontWeight: 700,
+                    fontSize: 14,
+                    boxShadow: "0 4px 12px rgba(37, 99, 235, 0.3)",
+                    transition: "all 0.3s ease",
+                  }}
+                  className="hover:shadow-[0_8px_20px_rgba(37,99,235,0.4)]"
+                >
+                  {user.name ? user.name[0].toUpperCase() : "U"}
+                </div>
+
+                {/* Logout Button */}
+                <button
+                  onClick={logout}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: 10,
+                    background: "rgba(255, 255, 255, 0.7)",
+                    border: "1px solid rgba(148, 163, 184, 0.4)",
+                    color: "#1E293B",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                  }}
+                  className="hover:bg-[#ffffff] hover:border-[rgba(37,99,235,0.4)] dark:bg-[rgba(30,50,100,0.5)] dark:border-[rgba(100,150,255,0.2)] dark:text-[#E2E8F0] dark:hover:bg-[rgba(50,80,150,0.6)]"
+                >
+                  Выйти
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileOpen(!isMobileOpen)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 40,
+              height: 40,
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              color: "#475569",
+              transition: "color 0.2s ease",
+            }}
+            className="lg:hidden dark:text-[#A0AEC0]"
+          >
+            {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+      </nav>
 
       {/* Mobile Menu */}
       {isMobileOpen && (
         <div
           style={{
-            borderTop: "1px solid rgba(255,255,255,0.2)",
-            background: "rgba(255, 255, 255, 0.5)",
+            position: "fixed",
+            top: 64,
+            left: 0,
+            right: 0,
+            background: "rgba(255, 255, 255, 0.95)",
             backdropFilter: "blur(12px)",
+            borderBottom: "1px solid rgba(255, 255, 255, 0.8)",
+            zIndex: 40,
+            padding: "12px 24px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+            transition: "all 0.3s ease",
           }}
+          className="dark:bg-[rgba(20,30,60,0.85)] dark:border-b-[rgba(100,150,255,0.2)]"
         >
-          <div
-            style={{
-              padding: "16px 24px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "12px",
-            }}
-          >
-            {NAV.map((n) => {
-              const isActive = active === n.key;
-              return (
-                <button
-                  key={n.key}
-                  onClick={() => {
-                    onNavigate(n.key);
-                    setIsMobileOpen(false);
-                  }}
-                  style={{
-                    background: isActive ? "rgba(37,99,235,0.15)" : "transparent",
-                    border: "none",
-                    color: isActive ? "#2563EB" : "#475569",
-                    fontWeight: isActive ? 700 : 500,
-                    fontSize: 14,
-                    padding: "12px 16px",
-                    borderRadius: 10,
-                    cursor: "pointer",
-                    textAlign: "left",
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  {n.label}
-                </button>
-              );
-            })}
-            <div
-              style={{
-                borderTop: "1px solid rgba(148,163,184,0.2)",
-                marginTop: "12px",
-                paddingTop: "12px",
-                display: "flex",
-                gap: "8px",
+          {navLinks.map((link) => (
+            <button
+              key={link.key}
+              onClick={() => {
+                onNavigate(link.key);
+                setIsMobileOpen(false);
               }}
+              style={{
+                padding: "12px 16px",
+                borderRadius: 8,
+                background: "transparent",
+                border: "none",
+                color: "#475569",
+                fontSize: 14,
+                fontWeight: 500,
+                cursor: "pointer",
+                textAlign: "left",
+                transition: "all 0.2s ease",
+              }}
+              className="hover:bg-[rgba(37,99,235,0.1)] hover:text-[#2563EB] dark:text-[#A0AEC0] dark:hover:bg-[rgba(100,150,255,0.1)] dark:hover:text-[#6DAAFF]"
             >
-              <button
-                onClick={() => {
-                  onNavigate("profile");
-                  setIsMobileOpen(false);
-                }}
-                title={user?.name}
-                style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: "50%",
-                  background: "linear-gradient(135deg, #2563EB, #7C3AED)",
-                  color: "#fff",
-                  fontSize: 13,
-                  fontWeight: 700,
-                  border: "2px solid #fff",
-                  boxShadow: "0 4px 14px rgba(37,99,235,0.4)",
-                  cursor: "pointer",
-                  flex: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {initials}
-              </button>
-              <button
-                onClick={logout}
-                title="Выйти"
-                style={{
-                  height: 38,
-                  padding: "0 14px",
-                  borderRadius: 10,
-                  background: "rgba(255,255,255,0.7)",
-                  border: "1px solid rgba(148,163,184,0.35)",
-                  color: "#475569",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 6,
-                  fontSize: 13,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                  flex: 1,
-                }}
-              >
-                <LogOut size={16} /> Выйти
-              </button>
-            </div>
-          </div>
+              {link.label}
+            </button>
+          ))}
         </div>
       )}
-    </nav>
+
+      <style>{`
+        @keyframes rotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        
+        @media (min-width: 1024px) {
+          nav > div > div:nth-child(2) {
+            display: flex;
+          }
+          
+          button.lg\\:hidden {
+            display: none;
+          }
+        }
+      `}</style>
+    </>
   );
 }
